@@ -1,4 +1,3 @@
-#ifndef SECONDCHANCE_H
 #define SECONDCHANCE_H
 
 #include <QMainWindow>
@@ -25,4 +24,3 @@ private slots:
 private:
     Ui::SecondChance *ui;
 };
-#endif // SECONDCHANCE_H
