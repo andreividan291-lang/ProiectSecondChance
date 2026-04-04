@@ -1,0 +1,23 @@
+# ninja log v6
+329	4906	7969897779079254	CMakeFiles/SecondChance.dir/secondchance.cpp.obj	59d6e069347af80c
+42	328	7969897776208322	SecondChance_autogen/timestamp	ad6cb155a1590b2b
+42	328	7969897776208322	D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/SecondChance_autogen/timestamp	ad6cb155a1590b2b
+42	328	7969897776208322	SecondChance_autogen/mocs_compilation.cpp	ad6cb155a1590b2b
+42	328	7969897776208322	D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/SecondChance_autogen/mocs_compilation.cpp	ad6cb155a1590b2b
+4907	5339	7969897824851520	SecondChance.exe	73c3bc1ed1c8e986
+170	2408	7969897208232194	CMakeFiles/SecondChance.dir/main.cpp.obj	61743d46cdb86e3c
+1112	6963	7969896630843996	CMakeFiles/SecondChance.dir/SecondChance_autogen/mocs_compilation.cpp.obj	14d5c8e82aa0b392
+2252	7660	7968593756544865	CMakeFiles/SecondChance.dir/mythread.cpp.obj	f356d9e6efff8808
+1141	6401	7969896631134151	CMakeFiles/SecondChance.dir/servermanager.cpp.obj	f8b4fb65f5ba0b69
+779	1864	7969105155958941	CMakeFiles/SecondChance.dir/utilizator.cpp.obj	40949c374ce21ed2
+28	779	7970190335336039	SecondChance_autogen/timestamp	ad6cb155a1590b2b
+28	779	7970190335336039	SecondChance_autogen/mocs_compilation.cpp	ad6cb155a1590b2b
+28	779	7970190335336039	D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/SecondChance_autogen/timestamp	ad6cb155a1590b2b
+28	779	7970190335336039	D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/SecondChance_autogen/mocs_compilation.cpp	ad6cb155a1590b2b
+810	2254	7970190336616896	CMakeFiles/SecondChance.dir/utilizator.cpp.obj	fdc36dad7c92c173
+802	2718	7970190336538915	CMakeFiles/SecondChance.dir/mythread.cpp.obj	3e1e5a1828efdc9c
+797	2769	7970190336488767	CMakeFiles/SecondChance.dir/servermanager.cpp.obj	9b9d406f720655ae
+788	3171	7970190336396828	CMakeFiles/SecondChance.dir/main.cpp.obj	dd0da468c7c63634
+782	3230	7970190336329098	CMakeFiles/SecondChance.dir/SecondChance_autogen/mocs_compilation.cpp.obj	97af3183fd95f301
+792	3384	7970190336436812	CMakeFiles/SecondChance.dir/secondchance.cpp.obj	d20861ff5c5c0acb
+3384	3664	7970190362350839	SecondChance.exe	208a6ec8a8d67c93
