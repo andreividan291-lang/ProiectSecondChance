@@ -19,12 +19,21 @@ public:
     ~SecondChance();
 
 private slots:
-    void on_pushButton_clicked();    // pentru trecere la page_2
-    void on_pushButton_2_clicked();  // pentru trecere la page_3
+    void on_LogInButton_clicked();    // pentru trecere la page_2
+    void on_SignUpButton_clicked();  // pentru trecere la page_3
     void onEmailReturnPressed();
     void onParolaReturnPressed();
+    void onNumeReturnPressed();
+    void onPrenumeReturnPressed();
+    void onNrTelefonReturnPressed();
+    void onBioReturnPressed();
+    void onSignInEmailReturnPressed();
+    void onSignInPasswordPressed();
+
 
     void on_DoneButton_clicked();
+
+    void on_SignInAppButton_clicked();
 
 private:
 
@@ -33,6 +42,11 @@ private:
 
     QLineEdit* emailLineEdit;
     QLineEdit* parolaLineEdit;
-
+    QLineEdit* numeLineEdit;
+    QLineEdit* prenumeLineEdit;
+    QLineEdit* nrTelefonLineEdit;
+    QLineEdit* bioLineEdit;
+    QLineEdit* signInEmailEdit;
+    QLineEdit* signInParolaEdit;
 };
 

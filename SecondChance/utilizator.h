@@ -10,10 +10,14 @@ protected:
 
     QString Email;
     QString Parola;
+    QString Nume;
+    QString Prenume;
+    QString NrTelefon;
+    QString Bio;
 
 public:
 
-    Utilizator(QString e, QString p);
+    Utilizator(QString e, QString p,QString n, QString pn, QString t, QString b = NULL);
 
 
     QString getEmail() const { return Email; }

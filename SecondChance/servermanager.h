@@ -1,5 +1,6 @@
 #define SERVERMANAGER_H
 
+#include <QRegularExpression>
 #include <QTcpServer>
 #include <QDebug>
 #include <QList>
@@ -8,6 +9,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include "utilizator.h"
+#include "myexception.h"
 
 class ServerManager : public QTcpServer
 {
@@ -37,6 +39,12 @@ public:
     void deleteUtilizator(Utilizator* u);
     void printUtilizatori();
     bool connectDB();
+    bool registerUser(QString email, QString parola, QString n, QString pn, QString t, QString b);
+    bool numeValid(QString n);
+    bool prenumeValid(QString pn);
+    bool telefonValid(QString n);
+    bool bioValid(QString n);
+    bool checkLogin(QString email, QString parola);
 
 protected:
     // Override-ul corect pentru multi-threading

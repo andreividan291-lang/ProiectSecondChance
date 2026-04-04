@@ -92,18 +92,111 @@ ServerManager::~ServerManager()
 
 bool ServerManager::connectDB()
 {
-        // 1️⃣ Alegem driver-ul SQLite
-        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    QSqlDatabase db = QSqlDatabase::addDatabase("QODBC");
 
-        // 2️⃣ Setăm numele fișierului DB
-        db.setDatabaseName("aplicatie.db");
+    QString connectionString =
+        "Driver={ODBC Driver 17 for SQL Server};"
+        "Server=UNCELEBRUANONIM\\SQLEXPRESS;"
+        "Database=DB_POO;"
+        "Trusted_Connection=yes;";
 
-        // 3️⃣ Deschidem conexiunea
-        if (!db.open()) {
-            qDebug() << "Eroare conectare DB:" << db.lastError().text();
+    db.setDatabaseName(connectionString);
+
+    if (!db.open()) {
+        qDebug() << "Eroare conectare:" << db.lastError().text();
+        return false;
+    }
+
+    qDebug() << "Conectat la DB_POO!";
+    return true;
+}
+
+bool ServerManager::registerUser(QString email, QString parola, QString n, QString pn, QString t, QString b)
+{
+    QSqlQuery query;
+
+    query.prepare("INSERT INTO Utilizatori (email, parola, nume, prenume, telefon, bio) "
+                  "VALUES (:email, :parola, :nume, :prenume, :telefon, :bio)");
+
+    query.bindValue(":email", email);
+    query.bindValue(":parola", parola);
+    query.bindValue(":nume", n);
+    query.bindValue(":prenume", pn);
+    query.bindValue(":telefon", t);
+    query.bindValue(":bio", b);
+
+    if (!query.exec()) {
+        qDebug() << "Eroare INSERT:" << query.lastError().text();
+        return false;
+    }
+
+    qDebug() << "User salvat in DB!";
+    return true;
+}
+
+bool ServerManager::numeValid(QString n)
+{
+    QRegularExpression regex("^[A-Za-z]+$"); // doar litere mari și mici
+    if (regex.match(n).hasMatch()) {
+        return true;
+    }
+    return false;
+}
+
+bool ServerManager::prenumeValid(QString pn)
+{
+    QRegularExpression regex("^[A-Za-z]+$"); // doar litere mari și mici
+    if (regex.match(pn).hasMatch()) {
+        return true;
+    }
+    return false;
+}
+
+bool ServerManager::telefonValid(QString t)
+{
+    bool onlyDigits = true;
+    for (int i = 0; i < t.length(); ++i) {
+        if (!t.at(i).isDigit()) {
+            onlyDigits = false;
+            break;
+        }
+    }
+    return onlyDigits;
+}
+
+bool ServerManager::bioValid(QString b)
+{
+    if(b.length()<200)
+    {
+        return true;
+    }
+    return false;
+}
+
+// Funcție care returnează true dacă email și parola există în DB
+bool ServerManager::checkLogin(QString email, QString parola)
+{
+    QSqlQuery query;
+
+    // Interogare pregătită pentru a evita SQL injection
+    query.prepare("SELECT COUNT(*) FROM Utilizatori WHERE email = :email AND parola = :parola");
+    query.bindValue(":email", email);
+    query.bindValue(":parola", parola);
+
+    if (!query.exec()) {
+        qDebug() << "Eroare la exec query:" << query.lastError().text();
+        return false;
+    }
+
+    if (query.next()) {
+        int count = query.value(0).toInt();
+        if (count > 0) {
+            qDebug() << "Login valid!";
+            return true;
+        } else {
+            qDebug() << "Email sau parola incorectă";
             return false;
         }
-
-        qDebug() << "Conectare DB realizata cu succes!";
-        return true;
+    }
+    return false;
 }
