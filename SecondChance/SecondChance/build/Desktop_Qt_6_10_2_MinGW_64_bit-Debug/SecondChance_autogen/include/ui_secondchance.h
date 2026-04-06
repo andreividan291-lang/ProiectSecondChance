@@ -32,7 +32,8 @@ public:
     QWidget *SignIn_UpPageClient;
     QPushButton *SignInClientButton;
     QPushButton *SignUpClientButton;
-    QWidget *AdminSignUpPage;
+    QWidget *AdminAppPage;
+    QLabel *label_18;
     QWidget *ChooseAccountTypePage;
     QPushButton *ChooseClientTypeButton;
     QPushButton *ChooseAdminClientButton;
@@ -105,9 +106,12 @@ public:
         SignUpClientButton->setObjectName("SignUpClientButton");
         SignUpClientButton->setGeometry(QRect(230, 130, 80, 18));
         stackedWidget->addWidget(SignIn_UpPageClient);
-        AdminSignUpPage = new QWidget();
-        AdminSignUpPage->setObjectName("AdminSignUpPage");
-        stackedWidget->addWidget(AdminSignUpPage);
+        AdminAppPage = new QWidget();
+        AdminAppPage->setObjectName("AdminAppPage");
+        label_18 = new QLabel(AdminAppPage);
+        label_18->setObjectName("label_18");
+        label_18->setGeometry(QRect(200, 40, 191, 16));
+        stackedWidget->addWidget(AdminAppPage);
         ChooseAccountTypePage = new QWidget();
         ChooseAccountTypePage->setObjectName("ChooseAccountTypePage");
         ChooseAccountTypePage->setEnabled(true);
@@ -140,7 +144,7 @@ public:
         label_13->setGeometry(QRect(96, 160, 121, 20));
         StatusSignUpLabelSignIn_Admin = new QLabel(AdminSignInPage);
         StatusSignUpLabelSignIn_Admin->setObjectName("StatusSignUpLabelSignIn_Admin");
-        StatusSignUpLabelSignIn_Admin->setGeometry(QRect(130, 190, 261, 20));
+        StatusSignUpLabelSignIn_Admin->setGeometry(QRect(120, 220, 261, 20));
         label_14 = new QLabel(AdminSignInPage);
         label_14->setObjectName("label_14");
         label_14->setGeometry(QRect(96, 130, 121, 20));
@@ -149,7 +153,7 @@ public:
         label_15->setGeometry(QRect(190, 70, 251, 16));
         SignIntoAppButton_Admin = new QPushButton(AdminSignInPage);
         SignIntoAppButton_Admin->setObjectName("SignIntoAppButton_Admin");
-        SignIntoAppButton_Admin->setGeometry(QRect(210, 220, 80, 18));
+        SignIntoAppButton_Admin->setGeometry(QRect(210, 260, 80, 18));
         InsertPasswordBoxSi_Admin = new QLineEdit(AdminSignInPage);
         InsertPasswordBoxSi_Admin->setObjectName("InsertPasswordBoxSi_Admin");
         InsertPasswordBoxSi_Admin->setGeometry(QRect(280, 160, 113, 20));
@@ -264,7 +268,7 @@ public:
 
         retranslateUi(SecondChance);
 
-        stackedWidget->setCurrentIndex(5);
+        stackedWidget->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(SecondChance);
@@ -275,6 +279,7 @@ public:
         SecondChance->setWindowTitle(QCoreApplication::translate("SecondChance", "SecondChance", nullptr));
         SignInClientButton->setText(QCoreApplication::translate("SecondChance", "Sign In", nullptr));
         SignUpClientButton->setText(QCoreApplication::translate("SecondChance", "Sign Up", nullptr));
+        label_18->setText(QCoreApplication::translate("SecondChance", "Admin Second Chance", nullptr));
         ChooseClientTypeButton->setText(QCoreApplication::translate("SecondChance", "Client", nullptr));
         ChooseAdminClientButton->setText(QCoreApplication::translate("SecondChance", "Admin", nullptr));
         AdminSignInButton->setText(QCoreApplication::translate("SecondChance", "Sign In", nullptr));

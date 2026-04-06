@@ -49,9 +49,11 @@ public:
     bool prenumeValid(QString pn);
     bool telefonValid(QString n);
     bool bioValid(QString n);
-    bool checkLogin(QString email, QString parola);
+    bool checkLoginUtilizator(QString email, QString parola);
     int get_userIndexInApp(){userIndexInApp++;return userIndexInApp;}
     int get_productIndexInApp(){productIndexInApp++;return productIndexInApp;}
+    bool checkLoginAdmin(QString email, QString parola, QString cod);
+    void generateAdminCredentials();
 
 
 protected:

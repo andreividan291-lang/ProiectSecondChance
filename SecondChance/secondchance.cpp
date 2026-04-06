@@ -177,7 +177,7 @@ void SecondChance::on_SignIntoAppButton_clicked()
             throw MyException("Te rog completează toate câmpurile!");
         }
 
-        bool loginValid = ServerManager::get_instance().checkLogin(email, parola);
+        bool loginValid = ServerManager::get_instance().checkLoginUtilizator(email, parola);
 
         if (!loginValid) {
             throw MyException("Contul nu există sau parola este greșită!");
@@ -259,3 +259,35 @@ void SecondChance::on_SignUpIntoApp_clicked()
         ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
     }
 }
+
+void SecondChance::on_SignIntoAppButton_Admin_clicked()
+{
+    QString adminEmail       = emailLineEdit_admin->text().trimmed();
+    QString adminParola      = parolaLineEdit_admin->text();
+    QString adminCodPersonal = codPersonalEdit_admin->text().trimmed();
+
+    // 1️⃣ Validare câmpuri goale
+    if (adminEmail.isEmpty() || adminParola.isEmpty() || adminCodPersonal.isEmpty())
+    {
+        ui->StatusSignUpLabelSignIn_Admin->setStyleSheet("color: orange;");
+        ui->StatusSignUpLabelSignIn_Admin->setText("Completați toate câmpurile!");
+        return;
+    }
+
+    // 2️⃣ Verificare login
+    bool ValidLogIn = ServerManager::get_instance().checkLoginAdmin(adminEmail, adminParola, adminCodPersonal);
+
+    if (!ValidLogIn)
+    {
+        ui->StatusSignUpLabelSignIn_Admin->setStyleSheet("color: red;");
+        ui->StatusSignUpLabelSignIn_Admin->setText("Email, parolă sau cod personal incorect!");
+        return;
+    }
+
+    // 3️⃣ Login reușit → deschide fereastra de admin
+    ui->StatusSignUpLabelSignIn_Admin->setStyleSheet("color: green;");
+    ui->StatusSignUpLabelSignIn_Admin->setText("Autentificare reușită!");
+
+    ui->stackedWidget->setCurrentWidget(ui->AdminAppPage);
+}
+

@@ -63,7 +63,8 @@ template <> constexpr inline auto SecondChance::qt_create_metaobjectdata<qt_meta
         "on_SignUpClientButton_clicked",
         "on_BackButtonSI_clicked",
         "on_ChooseAdminClientButton_clicked",
-        "on_AdminSignInButton_clicked"
+        "on_AdminSignInButton_clicked",
+        "on_SignIntoAppButton_Admin_clicked"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -113,6 +114,8 @@ template <> constexpr inline auto SecondChance::qt_create_metaobjectdata<qt_meta
         QtMocHelpers::SlotData<void()>(23, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'on_AdminSignInButton_clicked'
         QtMocHelpers::SlotData<void()>(24, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_SignIntoAppButton_Admin_clicked'
+        QtMocHelpers::SlotData<void()>(25, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -159,6 +162,7 @@ void SecondChance::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
         case 20: _t->on_BackButtonSI_clicked(); break;
         case 21: _t->on_ChooseAdminClientButton_clicked(); break;
         case 22: _t->on_AdminSignInButton_clicked(); break;
+        case 23: _t->on_SignIntoAppButton_Admin_clicked(); break;
         default: ;
         }
     }
@@ -184,14 +188,14 @@ int SecondChance::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 23)
+        if (_id < 24)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 23;
+        _id -= 24;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 23)
+        if (_id < 24)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 23;
+        _id -= 24;
     }
     return _id;
 }

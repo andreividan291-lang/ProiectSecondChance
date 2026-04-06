@@ -30,7 +30,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>5</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="SignIn_UpPageClient">
        <widget class="QPushButton" name="SignInClientButton">
@@ -60,7 +60,21 @@
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="AdminSignUpPage"/>
+      <widget class="QWidget" name="AdminAppPage">
+       <widget class="QLabel" name="label_18">
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>40</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Admin Second Chance</string>
+        </property>
+       </widget>
+      </widget>
       <widget class="QWidget" name="ChooseAccountTypePage">
        <property name="enabled">
         <bool>true</bool>
@@ -152,8 +166,8 @@
        <widget class="QLabel" name="StatusSignUpLabelSignIn_Admin">
         <property name="geometry">
          <rect>
-          <x>130</x>
-          <y>190</y>
+          <x>120</x>
+          <y>220</y>
           <width>261</width>
           <height>20</height>
          </rect>
@@ -192,7 +206,7 @@
         <property name="geometry">
          <rect>
           <x>210</x>
-          <y>220</y>
+          <y>260</y>
           <width>80</width>
           <height>18</height>
          </rect>

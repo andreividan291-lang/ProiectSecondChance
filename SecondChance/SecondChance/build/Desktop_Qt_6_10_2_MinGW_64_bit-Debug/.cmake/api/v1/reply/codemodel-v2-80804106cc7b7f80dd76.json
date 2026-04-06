@@ -7,7 +7,7 @@
 				{
 					"build" : ".",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-.-Debug-fb6b7d93b922da491e32.json",
+					"jsonFile" : "directory-.-Debug-0e3ff570cfd7172b0197.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.16"
@@ -44,7 +44,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "SecondChance::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-SecondChance-Debug-b1ee4cf28cf258c94e62.json",
+					"jsonFile" : "target-SecondChance-Debug-b726db3302cc1244ca5b.json",
 					"name" : "SecondChance",
 					"projectIndex" : 0
 				},

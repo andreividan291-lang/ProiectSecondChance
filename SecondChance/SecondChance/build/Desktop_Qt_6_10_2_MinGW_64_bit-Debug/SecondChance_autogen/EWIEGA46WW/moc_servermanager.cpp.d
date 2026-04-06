@@ -373,6 +373,7 @@ D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-De
   C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/time.h \
   C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/vadefs.h \
   C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/wchar.h \
+  D:/Proiect_Poo/SecondChance/generalaccount.h \
   D:/Proiect_Poo/SecondChance/myexception.h \
   D:/Proiect_Poo/SecondChance/mythread.h \
   D:/Proiect_Poo/SecondChance/utilizator.h

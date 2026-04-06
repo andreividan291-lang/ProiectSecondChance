@@ -55,6 +55,8 @@ private slots:
 
     void on_AdminSignInButton_clicked();
 
+    void on_SignIntoAppButton_Admin_clicked();
+
 private:
 
     Ui::SecondChance *ui;

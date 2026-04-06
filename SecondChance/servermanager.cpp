@@ -167,7 +167,7 @@ bool ServerManager::bioValid(QString b)
 }
 
 // Funcție care returnează true dacă email și parola există în DB
-bool ServerManager::checkLogin(QString email, QString parola)
+bool ServerManager::checkLoginUtilizator(QString email, QString parola)
 {
     QSqlQuery query;
     query.prepare("SELECT password_hash, salt FROM Utilizatori WHERE email = :email");
@@ -188,32 +188,40 @@ bool ServerManager::checkLogin(QString email, QString parola)
     return hash_input == hash_db;
 }
 
-bool ServerManager::registerAdmin(int id_app, QString email, QString parola, QString nume, int nivel)
+bool ServerManager::checkLoginAdmin(QString email, QString parola, QString codPers)
 {
-    // 1️⃣ Generează salt unic pentru fiecare admin
-    QString salt = QUuid::createUuid().toString();
+    QSqlQuery query;
+    query.prepare("SELECT password_hash, salt, cod_personal FROM Admini WHERE email = :email");
+    query.bindValue(":email", email);
 
-    // 2️⃣ Creează hash-ul parolei + salt
+    // 1️⃣ Verificăm dacă există userul
+    if (!query.exec() || !query.next())
+        return false;
+
+    QString hash_db  = query.value(0).toString();
+    QString salt_db  = query.value(1).toString();
+    QString codP_db  = query.value(2).toString();
+
+    // 2️⃣ Refacem hash-ul cu parola introdusă
+    QByteArray data = (parola + salt_db).toUtf8();
+    QString hash_input = QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex();
+
+    // 3️⃣ Comparăm parola
+    if (hash_input != hash_db)
+        return false;
+
+    // 4️⃣ Comparăm codul personal
+    return codPers == codP_db;
+}
+
+void ServerManager::generateAdminCredentials()
+{
+    QString parola = "a";
+    QString salt   = "a"; // poți pune orice string
+
     QByteArray data = (parola + salt).toUtf8();
     QString hash = QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex();
 
-    // 3️⃣ Pregătim interogarea INSERT
-    QSqlQuery query;
-    query.prepare("INSERT INTO Admini (id_in_app, email, password_hash, salt, nume, nivel) "
-                  "VALUES (:id_in_app, :email, :hash, :salt, :nume, :nivel)");
-
-    query.bindValue(":id_in_app", id_app);
-    query.bindValue(":email", email);
-    query.bindValue(":hash", hash);
-    query.bindValue(":salt", salt);
-    query.bindValue(":nume", nume);
-    query.bindValue(":nivel", nivel);
-
-    if (!query.exec()) {
-        qDebug() << "Eroare INSERT Admin:" << query.lastError().text();
-        return false;
-    }
-
-    qDebug() << "Admin salvat in DB!";
-    return true;
+    qDebug() << "Salt:" << salt;
+    qDebug() << "Hash:" << hash;
 }
