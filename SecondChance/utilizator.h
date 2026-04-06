@@ -26,6 +26,5 @@ public:
     void setEmail(const QString& e) { Email = e; }
     void setParola(const QString& p) { Parola = p; }
 
-
 };
 

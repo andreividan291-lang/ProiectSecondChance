@@ -1,9 +1,11 @@
 SecondChance_autogen/timestamp: \
+	C:/Qt/6.10.2/mingw_64/include/QtCore/QCryptographicHash \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/QDebug \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/QList \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/QRegularExpression \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/QString \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/QThread \
+	C:/Qt/6.10.2/mingw_64/include/QtCore/QUuid \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/q17memory.h \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/q20functional.h \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/q20iterator.h \
@@ -39,6 +41,7 @@ SecondChance_autogen/timestamp: \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/qcontainerinfo.h \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/qcontainertools_impl.h \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/qcontiguouscache.h \
+	C:/Qt/6.10.2/mingw_64/include/QtCore/qcryptographichash.h \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/qdarwinhelpers.h \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/qdatastream.h \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/qdeadlinetimer.h \
@@ -132,6 +135,7 @@ SecondChance_autogen/timestamp: \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/qtypes.h \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/qurl.h \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/qutf8stringview.h \
+	C:/Qt/6.10.2/mingw_64/include/QtCore/quuid.h \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/qvariant.h \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/qvarlengtharray.h \
 	C:/Qt/6.10.2/mingw_64/include/QtCore/qversiontagging.h \
@@ -667,6 +671,8 @@ SecondChance_autogen/timestamp: \
 	D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/CMakeFiles/3.30.5/CMakeRCCompiler.cmake \
 	D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/CMakeFiles/3.30.5/CMakeSystem.cmake \
 	D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/SecondChance_autogen/moc_predefs.h \
+	D:/Proiect_Poo/SecondChance/generalaccount.cpp \
+	D:/Proiect_Poo/SecondChance/generalaccount.h \
 	D:/Proiect_Poo/SecondChance/main.cpp \
 	D:/Proiect_Poo/SecondChance/myexception.cpp \
 	D:/Proiect_Poo/SecondChance/myexception.h \

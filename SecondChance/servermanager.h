@@ -1,5 +1,7 @@
 #define SERVERMANAGER_H
 
+#include <QUuid>
+#include <QCryptographicHash>
 #include <QRegularExpression>
 #include <QTcpServer>
 #include <QDebug>
@@ -17,7 +19,9 @@ class ServerManager : public QTcpServer
 
 private:
     static ServerManager* instance;
-    std::list<Utilizator*> ListaUtilizatoriAplicatie;
+
+    static int userIndexInApp;
+    static int productIndexInApp;
 
     // Constructor privat pentru Singleton
     explicit ServerManager(QObject* parent = nullptr);
@@ -39,12 +43,16 @@ public:
     void deleteUtilizator(Utilizator* u);
     void printUtilizatori();
     bool connectDB();
-    bool registerUser(QString email, QString parola, QString n, QString pn, QString t, QString b);
+    bool registerClient(int id_app, QString email, QString parola, QString n, QString pn, QString t, QString b);
+    bool registerAdmin(int id_app, QString email, QString parola, QString nume, int nivel);
     bool numeValid(QString n);
     bool prenumeValid(QString pn);
     bool telefonValid(QString n);
     bool bioValid(QString n);
     bool checkLogin(QString email, QString parola);
+    int get_userIndexInApp(){userIndexInApp++;return userIndexInApp;}
+    int get_productIndexInApp(){productIndexInApp++;return productIndexInApp;}
+
 
 protected:
     // Override-ul corect pentru multi-threading

@@ -14,7 +14,6 @@ void MyThread::run()
 {
     qDebug() << socketDescriptor << " Starting thread";
 
-    // Cream socket-ul PE FIRUL SECUNDAR (fara parinte!)
     socket = new QTcpSocket();
 
     if (!socket->setSocketDescriptor(this->socketDescriptor))
@@ -49,6 +48,5 @@ void MyThread::disconnected()
     qDebug() << "Clientul s-a deconectat.";
     socket->deleteLater();
 
-    // Oprim bucla de evenimente pornită de exec() ca thread-ul să se poată închide
     quit();
 }

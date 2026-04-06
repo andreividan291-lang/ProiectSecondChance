@@ -14,7 +14,6 @@ int main(int argc, char *argv[])
 
     ServerManager &MyServer = ServerManager::get_instance();
     MyServer.start_server(1234);
-    MyServer.printUtilizatori();
     MyServer.connectDB();
 
     return a.exec();

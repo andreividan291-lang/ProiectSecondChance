@@ -40,7 +40,7 @@ template <> constexpr inline auto SecondChance::qt_create_metaobjectdata<qt_meta
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
         "SecondChance",
-        "on_LogInButton_clicked",
+        "on_SignInButton_clicked",
         "",
         "on_SignUpButton_clicked",
         "onEmailReturnPressed",
@@ -51,12 +51,23 @@ template <> constexpr inline auto SecondChance::qt_create_metaobjectdata<qt_meta
         "onBioReturnPressed",
         "onSignInEmailReturnPressed",
         "onSignInPasswordPressed",
-        "on_DoneButton_clicked",
-        "on_SignInAppButton_clicked"
+        "onEmailAdminReturnPressed",
+        "onParolaAdminEmailPressed",
+        "onCodPersonalEmailPressed",
+        "on_SignIntoAppButton_clicked",
+        "on_SignUpIntoApp_clicked",
+        "on_SignInClientButton_clicked",
+        "on_pushButton_clicked",
+        "on_ChooseClientTypeButton_clicked",
+        "on_BackButtonSU_clicked",
+        "on_SignUpClientButton_clicked",
+        "on_BackButtonSI_clicked",
+        "on_ChooseAdminClientButton_clicked",
+        "on_AdminSignInButton_clicked"
     };
 
     QtMocHelpers::UintData qt_methods {
-        // Slot 'on_LogInButton_clicked'
+        // Slot 'on_SignInButton_clicked'
         QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'on_SignUpButton_clicked'
         QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
@@ -76,10 +87,32 @@ template <> constexpr inline auto SecondChance::qt_create_metaobjectdata<qt_meta
         QtMocHelpers::SlotData<void()>(10, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onSignInPasswordPressed'
         QtMocHelpers::SlotData<void()>(11, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'on_DoneButton_clicked'
+        // Slot 'onEmailAdminReturnPressed'
         QtMocHelpers::SlotData<void()>(12, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'on_SignInAppButton_clicked'
+        // Slot 'onParolaAdminEmailPressed'
         QtMocHelpers::SlotData<void()>(13, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onCodPersonalEmailPressed'
+        QtMocHelpers::SlotData<void()>(14, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_SignIntoAppButton_clicked'
+        QtMocHelpers::SlotData<void()>(15, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_SignUpIntoApp_clicked'
+        QtMocHelpers::SlotData<void()>(16, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_SignInClientButton_clicked'
+        QtMocHelpers::SlotData<void()>(17, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_pushButton_clicked'
+        QtMocHelpers::SlotData<void()>(18, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_ChooseClientTypeButton_clicked'
+        QtMocHelpers::SlotData<void()>(19, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_BackButtonSU_clicked'
+        QtMocHelpers::SlotData<void()>(20, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_SignUpClientButton_clicked'
+        QtMocHelpers::SlotData<void()>(21, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_BackButtonSI_clicked'
+        QtMocHelpers::SlotData<void()>(22, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_ChooseAdminClientButton_clicked'
+        QtMocHelpers::SlotData<void()>(23, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_AdminSignInButton_clicked'
+        QtMocHelpers::SlotData<void()>(24, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -103,7 +136,7 @@ void SecondChance::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
     auto *_t = static_cast<SecondChance *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->on_LogInButton_clicked(); break;
+        case 0: _t->on_SignInButton_clicked(); break;
         case 1: _t->on_SignUpButton_clicked(); break;
         case 2: _t->onEmailReturnPressed(); break;
         case 3: _t->onParolaReturnPressed(); break;
@@ -113,8 +146,19 @@ void SecondChance::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
         case 7: _t->onBioReturnPressed(); break;
         case 8: _t->onSignInEmailReturnPressed(); break;
         case 9: _t->onSignInPasswordPressed(); break;
-        case 10: _t->on_DoneButton_clicked(); break;
-        case 11: _t->on_SignInAppButton_clicked(); break;
+        case 10: _t->onEmailAdminReturnPressed(); break;
+        case 11: _t->onParolaAdminEmailPressed(); break;
+        case 12: _t->onCodPersonalEmailPressed(); break;
+        case 13: _t->on_SignIntoAppButton_clicked(); break;
+        case 14: _t->on_SignUpIntoApp_clicked(); break;
+        case 15: _t->on_SignInClientButton_clicked(); break;
+        case 16: _t->on_pushButton_clicked(); break;
+        case 17: _t->on_ChooseClientTypeButton_clicked(); break;
+        case 18: _t->on_BackButtonSU_clicked(); break;
+        case 19: _t->on_SignUpClientButton_clicked(); break;
+        case 20: _t->on_BackButtonSI_clicked(); break;
+        case 21: _t->on_ChooseAdminClientButton_clicked(); break;
+        case 22: _t->on_AdminSignInButton_clicked(); break;
         default: ;
         }
     }
@@ -140,14 +184,14 @@ int SecondChance::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 12)
+        if (_id < 23)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 12;
+        _id -= 23;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 12)
+        if (_id < 23)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 12;
+        _id -= 23;
     }
     return _id;
 }

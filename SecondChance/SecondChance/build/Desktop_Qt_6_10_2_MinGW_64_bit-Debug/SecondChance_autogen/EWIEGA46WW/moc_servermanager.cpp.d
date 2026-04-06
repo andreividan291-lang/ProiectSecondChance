@@ -1,10 +1,12 @@
 D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/SecondChance_autogen/EWIEGA46WW/moc_servermanager.cpp: D:/Proiect_Poo/SecondChance/servermanager.h \
   D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/SecondChance_autogen/moc_predefs.h \
+  C:/Qt/6.10.2/mingw_64/include/QtCore/QCryptographicHash \
   C:/Qt/6.10.2/mingw_64/include/QtCore/QDebug \
   C:/Qt/6.10.2/mingw_64/include/QtCore/QList \
   C:/Qt/6.10.2/mingw_64/include/QtCore/QRegularExpression \
   C:/Qt/6.10.2/mingw_64/include/QtCore/QString \
   C:/Qt/6.10.2/mingw_64/include/QtCore/QThread \
+  C:/Qt/6.10.2/mingw_64/include/QtCore/QUuid \
   C:/Qt/6.10.2/mingw_64/include/QtCore/q17memory.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/q20functional.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/q20iterator.h \
@@ -39,10 +41,12 @@ D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-De
   C:/Qt/6.10.2/mingw_64/include/QtCore/qcontainerinfo.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qcontainertools_impl.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qcontiguouscache.h \
+  C:/Qt/6.10.2/mingw_64/include/QtCore/qcryptographichash.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qdarwinhelpers.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qdatastream.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qdeadlinetimer.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qdebug.h \
+  C:/Qt/6.10.2/mingw_64/include/QtCore/qendian.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qexceptionhandling.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qflags.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qfloat16.h \
@@ -125,6 +129,7 @@ D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-De
   C:/Qt/6.10.2/mingw_64/include/QtCore/qtypeinfo.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qtypes.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qutf8stringview.h \
+  C:/Qt/6.10.2/mingw_64/include/QtCore/quuid.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qvariant.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qvarlengtharray.h \
   C:/Qt/6.10.2/mingw_64/include/QtCore/qversiontagging.h \

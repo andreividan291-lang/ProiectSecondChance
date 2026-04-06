@@ -19,8 +19,9 @@ public:
     ~SecondChance();
 
 private slots:
-    void on_LogInButton_clicked();    // pentru trecere la page_2
-    void on_SignUpButton_clicked();  // pentru trecere la page_3
+
+    void on_SignInButton_clicked();
+    void on_SignUpButton_clicked();
     void onEmailReturnPressed();
     void onParolaReturnPressed();
     void onNumeReturnPressed();
@@ -30,10 +31,29 @@ private slots:
     void onSignInEmailReturnPressed();
     void onSignInPasswordPressed();
 
+    void onEmailAdminReturnPressed();
+    void onParolaAdminEmailPressed();
+    void onCodPersonalEmailPressed();
 
-    void on_DoneButton_clicked();
+    void on_SignIntoAppButton_clicked();
 
-    void on_SignInAppButton_clicked();
+    void on_SignUpIntoApp_clicked();
+
+    void on_SignInClientButton_clicked();
+
+    void on_pushButton_clicked();
+
+    void on_ChooseClientTypeButton_clicked();
+
+    void on_BackButtonSU_clicked();
+
+    void on_SignUpClientButton_clicked();
+
+    void on_BackButtonSI_clicked();
+
+    void on_ChooseAdminClientButton_clicked();
+
+    void on_AdminSignInButton_clicked();
 
 private:
 
@@ -48,5 +68,9 @@ private:
     QLineEdit* bioLineEdit;
     QLineEdit* signInEmailEdit;
     QLineEdit* signInParolaEdit;
+
+    QLineEdit* emailLineEdit_admin;
+    QLineEdit* parolaLineEdit_admin;
+    QLineEdit* codPersonalEdit_admin;
 };
 

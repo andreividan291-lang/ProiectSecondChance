@@ -357,11 +357,13 @@ D:/Proiect_Poo/SecondChance/mythread.h
  mdp:D:/Proiect_Poo/SecondChance/mythread.h
 D:/Proiect_Poo/SecondChance/servermanager.h
  mmc:Q_OBJECT
+ mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/QCryptographicHash
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/QDebug
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/QList
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/QRegularExpression
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/QString
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/QThread
+ mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/QUuid
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/q17memory.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/q20functional.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/q20iterator.h
@@ -396,10 +398,12 @@ D:/Proiect_Poo/SecondChance/servermanager.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qcontainerinfo.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qcontainertools_impl.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qcontiguouscache.h
+ mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qcryptographichash.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qdarwinhelpers.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qdatastream.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qdeadlinetimer.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qdebug.h
+ mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qendian.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qexceptionhandling.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qflags.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qfloat16.h
@@ -482,6 +486,7 @@ D:/Proiect_Poo/SecondChance/servermanager.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qtypeinfo.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qtypes.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qutf8stringview.h
+ mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/quuid.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qvariant.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qvarlengtharray.h
  mdp:C:/Qt/6.10.2/mingw_64/include/QtCore/qversiontagging.h
@@ -1132,3 +1137,7 @@ D:/Proiect_Poo/SecondChance/secondchance.cpp
  uic:./ui_secondchance.h
 D:/Proiect_Poo/SecondChance/utilizator.cpp
 D:/Proiect_Poo/SecondChance/myexception.cpp
+D:/Proiect_Poo/SecondChance/produs.h
+D:/Proiect_Poo/SecondChance/produs.cpp
+D:/Proiect_Poo/SecondChance/generalaccount.h
+D:/Proiect_Poo/SecondChance/generalaccount.cpp

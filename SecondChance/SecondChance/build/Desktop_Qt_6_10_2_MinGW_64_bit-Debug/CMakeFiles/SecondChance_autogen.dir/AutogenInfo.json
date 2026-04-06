@@ -394,6 +394,12 @@
 	"HEADERS" : 
 	[
 		[
+			"D:/Proiect_Poo/SecondChance/generalaccount.h",
+			"MU",
+			"EWIEGA46WW/moc_generalaccount.cpp",
+			null
+		],
+		[
 			"D:/Proiect_Poo/SecondChance/myexception.h",
 			"MU",
 			"EWIEGA46WW/moc_myexception.cpp",
@@ -499,6 +505,7 @@
 	"SETTINGS_FILE" : "D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/CMakeFiles/SecondChance_autogen.dir/AutogenUsed.txt",
 	"SOURCES" : 
 	[
+		[ "D:/Proiect_Poo/SecondChance/generalaccount.cpp", "MU", null ],
 		[ "D:/Proiect_Poo/SecondChance/main.cpp", "MU", null ],
 		[ "D:/Proiect_Poo/SecondChance/myexception.cpp", "MU", null ],
 		[ "D:/Proiect_Poo/SecondChance/mythread.cpp", "MU", null ],

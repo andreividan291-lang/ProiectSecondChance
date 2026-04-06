@@ -8,27 +8,41 @@ SecondChance::SecondChance(QWidget *parent)
     , ui(new Ui::SecondChance)
 {
     ui->setupUi(this);
-    ui->stackedWidget->setCurrentWidget(ui->page);
 
-    emailLineEdit = ui->InsertEmailBox;
-    parolaLineEdit = ui->InsertPasswordBox;
-    numeLineEdit = ui->InsertNumeBox;
-    prenumeLineEdit = ui->InsertPrenumeBox;
-    nrTelefonLineEdit = ui ->InsertNrTelefonBox;
-    bioLineEdit = ui->InsertBioBox;
-    signInEmailEdit = ui->SignInEmailBox;
-    signInParolaEdit = ui->SignInPasswordBox;
+    // Pagina initiala
+    ui->stackedWidget->setCurrentWidget(ui->ChooseAccountTypePage);
 
+    // Legaturi UI
+    emailLineEdit = ui->InsertEmailBoxSU;
+    parolaLineEdit = ui->InsertPasswordBoxSU;
+    numeLineEdit = ui->InsertNumeBoxSU;
+    prenumeLineEdit = ui->InsertPrenumeBoxSU;
+    nrTelefonLineEdit = ui->InsertNrTelefonBoxSU;
+    bioLineEdit = ui->InsertBioBoxSU;
 
+    signInEmailEdit = ui->InsertEmailBoxSI;
+    signInParolaEdit = ui->InsertPasswordBoxSi;
+
+    emailLineEdit_admin = ui->InsertEmailBoxSI_Admin;
+    parolaLineEdit_admin = ui->InsertPasswordBoxSi_Admin;
+    codPersonalEdit_admin = ui->InsertPersonalCodeBox;
+
+    // Connecturi - SIGN UP
     connect(emailLineEdit, &QLineEdit::returnPressed, this, &SecondChance::onEmailReturnPressed);
     connect(parolaLineEdit, &QLineEdit::returnPressed, this, &SecondChance::onParolaReturnPressed);
     connect(numeLineEdit, &QLineEdit::returnPressed, this, &SecondChance::onNumeReturnPressed);
     connect(prenumeLineEdit, &QLineEdit::returnPressed, this, &SecondChance::onPrenumeReturnPressed);
     connect(nrTelefonLineEdit, &QLineEdit::returnPressed, this, &SecondChance::onNrTelefonReturnPressed);
     connect(bioLineEdit, &QLineEdit::returnPressed, this, &SecondChance::onBioReturnPressed);
+
+    // Connecturi - SIGN IN
     connect(signInEmailEdit, &QLineEdit::returnPressed, this, &SecondChance::onSignInEmailReturnPressed);
     connect(signInParolaEdit, &QLineEdit::returnPressed, this, &SecondChance::onSignInPasswordPressed);
 
+    // Connecturi - ADMIN
+    connect(emailLineEdit_admin, &QLineEdit::returnPressed, this, &SecondChance::onEmailAdminReturnPressed);
+    connect(parolaLineEdit_admin, &QLineEdit::returnPressed, this, &SecondChance::onParolaAdminEmailPressed);
+    connect(codPersonalEdit_admin, &QLineEdit::returnPressed, this, &SecondChance::onCodPersonalEmailPressed);
 }
 
 SecondChance::~SecondChance()
@@ -36,161 +50,212 @@ SecondChance::~SecondChance()
     delete ui;
 }
 
-void SecondChance::on_LogInButton_clicked()
-{
-    ui->stackedWidget->setCurrentWidget(ui->page_2);
-}
+//
+// ================= NAVIGARE =================
+//
 
+void SecondChance::on_SignInButton_clicked()
+{
+    ui->stackedWidget->setCurrentWidget(ui->SignIn_UpPageClient);
+}
 
 void SecondChance::on_SignUpButton_clicked()
 {
-    ui->stackedWidget->setCurrentWidget(ui->page_3);
+    ui->stackedWidget->setCurrentWidget(ui->ChooseAccountTypePage);
 }
 
-void SecondChance::onEmailReturnPressed() {
-    QString text = emailLineEdit->text();
+void SecondChance::on_SignInClientButton_clicked()
+{
+    ui->stackedWidget->setCurrentWidget(ui->SignInClient);
+}
+
+void SecondChance::on_SignUpClientButton_clicked()
+{
+    ui->stackedWidget->setCurrentWidget(ui->SignUpClient);
+}
+
+void SecondChance::on_pushButton_clicked()
+{
+    ui->stackedWidget->setCurrentWidget(ui->SignUpClient);
+}
+
+void SecondChance::on_ChooseClientTypeButton_clicked()
+{
+    ui->stackedWidget->setCurrentWidget(ui->SignIn_UpPageClient);
+}
+
+void SecondChance::on_BackButtonSU_clicked()
+{
+    ui->stackedWidget->setCurrentWidget(ui->SignIn_UpPageClient);
+}
+
+void SecondChance::on_BackButtonSI_clicked()
+{
+    ui->stackedWidget->setCurrentWidget(ui->SignIn_UpPageClient);
+}
+
+void SecondChance::on_ChooseAdminClientButton_clicked()
+{
+    ui->stackedWidget->setCurrentWidget(ui->AdminSignInUpPage);
+}
+
+void SecondChance::on_AdminSignInButton_clicked()
+{
+    ui->stackedWidget->setCurrentWidget(ui->AdminSignInPage);
+}
+
+//
+// ================= RETURN PRESSED =================
+//
+
+void SecondChance::onEmailReturnPressed()
+{
     emailLineEdit->clearFocus();
 }
 
-void SecondChance::onParolaReturnPressed() {
-    QString text = parolaLineEdit->text();
+void SecondChance::onParolaReturnPressed()
+{
     parolaLineEdit->clearFocus();
 }
 
 void SecondChance::onNumeReturnPressed()
 {
-    QString text = parolaLineEdit->text();
-    parolaLineEdit->clearFocus();
+    numeLineEdit->clearFocus();
 }
 
 void SecondChance::onPrenumeReturnPressed()
 {
-    QString text = parolaLineEdit->text();
-    parolaLineEdit->clearFocus();
+    prenumeLineEdit->clearFocus();
 }
 
 void SecondChance::onNrTelefonReturnPressed()
 {
-    QString text = parolaLineEdit->text();
-    parolaLineEdit->clearFocus();
+    nrTelefonLineEdit->clearFocus();
 }
+
 void SecondChance::onBioReturnPressed()
 {
-    QString text = parolaLineEdit->text();
-    parolaLineEdit->clearFocus();
+    bioLineEdit->clearFocus();
 }
 
 void SecondChance::onSignInEmailReturnPressed()
 {
-    QString text = signInEmailEdit->text();
-    parolaLineEdit->clearFocus();
+    signInEmailEdit->clearFocus();
 }
 
 void SecondChance::onSignInPasswordPressed()
 {
-    QString text = signInParolaEdit->text();
-    parolaLineEdit->clearFocus();
+    signInParolaEdit->clearFocus();
 }
 
-
-void SecondChance::on_DoneButton_clicked()
+void SecondChance::onEmailAdminReturnPressed()
 {
-    QString email = emailLineEdit->text();
-    QString parola = parolaLineEdit->text();
-    QString nume = numeLineEdit->text();
-    QString prenume = prenumeLineEdit->text();
-    QString nrTel = nrTelefonLineEdit->text();
-    QString bio = bioLineEdit->text();
-
-
-
-    int pozAt = email.indexOf("@");
-    QString dupaAt = email.mid(pozAt + 1);
-
-    if (!email.contains("@") || (pozAt == 0 || pozAt == email.length() - 1) || (!dupaAt.contains("."))) {
-        ui->StatusSignUpLabelSignUp->setText("Email invalid!");
-        ui->StatusSignUpLabelSignUp->setStyleSheet("color: red;");
-        return;
-    }
-
-    if(email.isEmpty() || parola.isEmpty() || nume.isEmpty() || prenume.isEmpty() || nrTel.isEmpty()) {
-        ui->StatusSignUpLabelSignUp->setText("Toate câmpurile trebuie completate!");
-        ui->StatusSignUpLabelSignUp->setStyleSheet("color: red;");
-        return;
-    }
-
-    if(!ServerManager::get_instance().numeValid(nume))
-    {
-        ui->StatusSignUpLabelSignUp->setText("Nume invalid!");
-        ui->StatusSignUpLabelSignUp->setStyleSheet("color: red;");
-        return;
-    }
-
-    if(!ServerManager::get_instance().prenumeValid(prenume))
-    {
-        ui->StatusSignUpLabelSignUp->setText("Nume invalid!");
-        ui->StatusSignUpLabelSignUp->setStyleSheet("color: red;");
-        return;
-    }
-
-    if(!ServerManager::get_instance().telefonValid(nrTel))
-    {
-        ui->StatusSignUpLabelSignUp->setText("Numar telefon invalid!");
-        ui->StatusSignUpLabelSignUp->setStyleSheet("color: red;");
-        return;
-    }
-
-    if(!ServerManager::get_instance().bioValid(bio))
-    {
-        ui->StatusSignUpLabelSignUp->setText("Bio prea lung! (max200)");
-        ui->StatusSignUpLabelSignUp->setStyleSheet("color: red;");
-        return;
-    }
-
-    bool success = ServerManager::get_instance().registerUser(email, parola,nume, prenume,nrTel, bio);
-
-    if(success) {
-        ui->StatusSignUpLabelSignUp->setText("User creat cu succes!");
-        ui->StatusSignUpLabelSignUp->setStyleSheet("color: green;");
-        ui->stackedWidget->setCurrentWidget(ui->page_4);
-    } else {
-        ui->StatusSignUpLabelSignUp->setText("Email-ul există deja sau a apărut o eroare!");
-        ui->StatusSignUpLabelSignUp->setStyleSheet("color: red;");
-    }
+    emailLineEdit_admin->clearFocus();
 }
 
-void SecondChance::on_SignInAppButton_clicked()
+void SecondChance::onParolaAdminEmailPressed()
+{
+    parolaLineEdit_admin->clearFocus();
+}
+
+void SecondChance::onCodPersonalEmailPressed()
+{
+    codPersonalEdit_admin->clearFocus();
+}
+
+//
+// ================= SIGN IN =================
+//
+
+void SecondChance::on_SignIntoAppButton_clicked()
 {
     try {
-        // 1️⃣ Preluăm valorile din QLineEdit și le curățăm
         QString email = signInEmailEdit->text().trimmed().remove(QRegularExpression("\\s"));
         QString parola = signInParolaEdit->text().trimmed().remove(QRegularExpression("\\s"));
 
-        // 2️⃣ Validări simple înainte de interogare
         if (email.isEmpty() || parola.isEmpty()) {
             throw MyException("Te rog completează toate câmpurile!");
         }
 
-        // 3️⃣ Verificăm login-ul în baza de date
         bool loginValid = ServerManager::get_instance().checkLogin(email, parola);
 
         if (!loginValid) {
-            // Dacă nu există contul, aruncăm excepție
             throw MyException("Contul nu există sau parola este greșită!");
         }
 
-        // 4️⃣ Dacă login-ul e valid, trecem la pagina principală
-        ui->stackedWidget->setCurrentWidget(ui->page_4);
-        ui->StatusSignUpLabelSignIn->clear(); // curățăm mesajul de eroare
+        ui->stackedWidget->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
+        ui->StatusSignUpLabelSignIn->clear();
 
     } catch (const MyException& ex) {
-        // 5️⃣ Prindem excepția și afișăm mesajul în label
         ui->StatusSignUpLabelSignIn->setText(ex.what());
         ui->StatusSignUpLabelSignIn->setStyleSheet("color: red;");
     } catch (const std::exception& ex) {
-        // 6️⃣ Alte erori neașteptate
         ui->StatusSignUpLabelSignIn->setText("A apărut o eroare neașteptată!");
         ui->StatusSignUpLabelSignIn->setStyleSheet("color: red;");
-        qDebug() << "Eroare neașteptată:" << ex.what();
+        qDebug() << ex.what();
+    }
+}
+
+//
+// ================= SIGN UP =================
+//
+
+void SecondChance::on_SignUpIntoApp_clicked()
+{
+    QString email = emailLineEdit->text().trimmed();
+    QString parola = parolaLineEdit->text().trimmed();
+    QString nume = numeLineEdit->text().trimmed();
+    QString prenume = prenumeLineEdit->text().trimmed();
+    QString nrTel = nrTelefonLineEdit->text().trimmed();
+    QString bio = bioLineEdit->text().trimmed();
+
+    if (email.isEmpty() || parola.isEmpty() || nume.isEmpty() || prenume.isEmpty() || nrTel.isEmpty()) {
+        ui->StatusSignUpLabelSU->setText("Toate câmpurile trebuie completate!");
+        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
+        return;
+    }
+
+    if (!email.contains("@") || !email.contains(".")) {
+        ui->StatusSignUpLabelSU->setText("Email invalid!");
+        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
+        return;
+    }
+
+    if (!ServerManager::get_instance().numeValid(nume)) {
+        ui->StatusSignUpLabelSU->setText("Nume invalid!");
+        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
+        return;
+    }
+
+    if (!ServerManager::get_instance().prenumeValid(prenume)) {
+        ui->StatusSignUpLabelSU->setText("Prenume invalid!");
+        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
+        return;
+    }
+
+    if (!ServerManager::get_instance().telefonValid(nrTel)) {
+        ui->StatusSignUpLabelSU->setText("Număr telefon invalid!");
+        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
+        return;
+    }
+
+    if (!ServerManager::get_instance().bioValid(bio)) {
+        ui->StatusSignUpLabelSU->setText("Bio prea lung! (max 200)");
+        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
+        return;
+    }
+
+    bool success = ServerManager::get_instance().registerClient(
+        ServerManager::get_instance().get_userIndexInApp(),
+        email, parola, nume, prenume, nrTel, bio
+        );
+
+    if (success) {
+        ui->StatusSignUpLabelSU->setText("User creat cu succes!");
+        ui->StatusSignUpLabelSU->setStyleSheet("color: green;");
+        ui->stackedWidget->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
+    } else {
+        ui->StatusSignUpLabelSU->setText("Email-ul există deja sau eroare!");
+        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
     }
 }

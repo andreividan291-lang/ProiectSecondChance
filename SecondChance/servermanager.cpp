@@ -1,5 +1,8 @@
 #include "servermanager.h"
 
+int ServerManager::userIndexInApp = 1000;
+int ServerManager::productIndexInApp = 1000;
+
 ServerManager* ServerManager::instance = nullptr;
 
 ServerManager::ServerManager(QObject* parent) : QTcpServer(parent)
@@ -66,25 +69,6 @@ void ServerManager::incomingConnection(qintptr socketDescriptor)
     thread->start();
 }
 
-void ServerManager::addUtilizator(Utilizator *u)
-{
-    ListaUtilizatoriAplicatie.push_back(u);
-}
-
-void ServerManager::deleteUtilizator(Utilizator *u)
-{
-    ListaUtilizatoriAplicatie.remove(u);
-    delete u;
-}
-
-void ServerManager::printUtilizatori()
-{
-    for(auto& u : ListaUtilizatoriAplicatie)
-    {
-        qDebug()<<u->getEmail()<<" "<<u->getParola()<<"\n";
-    }
-}
-
 ServerManager::~ServerManager()
 {
     stop_server();
@@ -111,15 +95,24 @@ bool ServerManager::connectDB()
     return true;
 }
 
-bool ServerManager::registerUser(QString email, QString parola, QString n, QString pn, QString t, QString b)
+bool ServerManager::registerClient(int id_app,QString email, QString parola, QString n, QString pn, QString t, QString b)
 {
+    // 1️⃣ Generează salt unic pentru fiecare user
+    QString salt = QUuid::createUuid().toString();
+
+    // 2️⃣ Creează hash-ul parolei + salt
+    QByteArray data = (parola + salt).toUtf8();
+    QString hash = QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex();
+
+    // 3️⃣ Inserăm în baza de date
     QSqlQuery query;
+    query.prepare("INSERT INTO Utilizatori (id_in_app, email, password_hash, salt, nume, prenume, telefon, bio) "
+                  "VALUES (:id_in_app, :email, :hash, :salt, :nume, :prenume, :telefon, :bio)");
 
-    query.prepare("INSERT INTO Utilizatori (email, parola, nume, prenume, telefon, bio) "
-                  "VALUES (:email, :parola, :nume, :prenume, :telefon, :bio)");
-
+    query.bindValue(":id_in_app",id_app);
     query.bindValue(":email", email);
-    query.bindValue(":parola", parola);
+    query.bindValue(":hash", hash);
+    query.bindValue(":salt", salt);
     query.bindValue(":nume", n);
     query.bindValue(":prenume", pn);
     query.bindValue(":telefon", t);
@@ -177,26 +170,50 @@ bool ServerManager::bioValid(QString b)
 bool ServerManager::checkLogin(QString email, QString parola)
 {
     QSqlQuery query;
-
-    // Interogare pregătită pentru a evita SQL injection
-    query.prepare("SELECT COUNT(*) FROM Utilizatori WHERE email = :email AND parola = :parola");
+    query.prepare("SELECT password_hash, salt FROM Utilizatori WHERE email = :email");
     query.bindValue(":email", email);
-    query.bindValue(":parola", parola);
+
+    // 1️⃣ Verificăm dacă există userul
+    if (!query.exec() || !query.next())
+        return false;
+
+    QString hash_db = query.value(0).toString();
+    QString salt_db = query.value(1).toString();
+
+    // 2️⃣ Refacem hash-ul cu parola introdusă
+    QByteArray data = (parola + salt_db).toUtf8();
+    QString hash_input = QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex();
+
+    // 3️⃣ Comparăm
+    return hash_input == hash_db;
+}
+
+bool ServerManager::registerAdmin(int id_app, QString email, QString parola, QString nume, int nivel)
+{
+    // 1️⃣ Generează salt unic pentru fiecare admin
+    QString salt = QUuid::createUuid().toString();
+
+    // 2️⃣ Creează hash-ul parolei + salt
+    QByteArray data = (parola + salt).toUtf8();
+    QString hash = QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex();
+
+    // 3️⃣ Pregătim interogarea INSERT
+    QSqlQuery query;
+    query.prepare("INSERT INTO Admini (id_in_app, email, password_hash, salt, nume, nivel) "
+                  "VALUES (:id_in_app, :email, :hash, :salt, :nume, :nivel)");
+
+    query.bindValue(":id_in_app", id_app);
+    query.bindValue(":email", email);
+    query.bindValue(":hash", hash);
+    query.bindValue(":salt", salt);
+    query.bindValue(":nume", nume);
+    query.bindValue(":nivel", nivel);
 
     if (!query.exec()) {
-        qDebug() << "Eroare la exec query:" << query.lastError().text();
+        qDebug() << "Eroare INSERT Admin:" << query.lastError().text();
         return false;
     }
 
-    if (query.next()) {
-        int count = query.value(0).toInt();
-        if (count > 0) {
-            qDebug() << "Login valid!";
-            return true;
-        } else {
-            qDebug() << "Email sau parola incorectă";
-            return false;
-        }
-    }
-    return false;
+    qDebug() << "Admin salvat in DB!";
+    return true;
 }
