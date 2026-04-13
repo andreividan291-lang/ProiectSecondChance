@@ -1,4 +1,4 @@
-# Install script for directory: D:/Proiect_Poo/SecondChance/SecondChance
+# Install script for directory: D:/Proiect_POO_copie/ProiectSecondChance/SecondChance
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -38,7 +38,7 @@ if(NOT DEFINED CMAKE_OBJDUMP)
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/SecondChance.exe")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "D:/Proiect_POO_copie/ProiectSecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/SecondChance.exe")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/SecondChance.exe" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/SecondChance.exe")
     if(CMAKE_INSTALL_DO_STRIP)
@@ -62,6 +62,6 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-  file(WRITE "D:/Proiect_Poo/SecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "D:/Proiect_POO_copie/ProiectSecondChance/SecondChance/build/Desktop_Qt_6_10_2_MinGW_64_bit-Debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

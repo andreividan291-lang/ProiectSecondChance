@@ -12,7 +12,7 @@ public:
     ~MyThread();
 
 protected:
-    void run() override; // Punctul de intrare pe firul secundar
+    void run() override;
 
 private slots:
     void readyRead();

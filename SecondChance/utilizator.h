@@ -7,6 +7,7 @@
 class Utilizator : public GeneralAccount
 {
 
+    //TO DO: De adaugat adresa;
 
 protected:
 

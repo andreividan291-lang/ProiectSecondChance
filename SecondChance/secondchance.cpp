@@ -1,293 +1,352 @@
 #include "secondchance.h"
 #include "./ui_secondchance.h"
-#include "utilizator.h"
-#include "servermanager.h"
 
+// ─── Stiluri ──────────────────────────────────────────────────────────────────
+static const QString STYLE_ERROR = "border: 1px solid red; border-radius: 4px;";
+static const QString STYLE_OK    = "border: 1px solid green; border-radius: 4px;";
+static const QString STYLE_RESET = "";
+
+// ─── Constructor ──────────────────────────────────────────────────────────────
 SecondChance::SecondChance(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::SecondChance)
 {
     ui->setupUi(this);
 
-    // Pagina initiala
-    ui->stackedWidget->setCurrentWidget(ui->ChooseAccountTypePage);
+    // Conectare la serverul VS
+    if (!ServerManager::get_instance().start_server(1234)) {
+        qDebug() << "[Qt] Nu s-a putut conecta la server!";
+    }
 
-    // Legaturi UI
-    emailLineEdit = ui->InsertEmailBoxSU;
-    parolaLineEdit = ui->InsertPasswordBoxSU;
-    numeLineEdit = ui->InsertNumeBoxSU;
-    prenumeLineEdit = ui->InsertPrenumeBoxSU;
-    nrTelefonLineEdit = ui->InsertNrTelefonBoxSU;
-    bioLineEdit = ui->InsertBioBoxSU;
-
-    signInEmailEdit = ui->InsertEmailBoxSI;
-    signInParolaEdit = ui->InsertPasswordBoxSi;
-
-    emailLineEdit_admin = ui->InsertEmailBoxSI_Admin;
-    parolaLineEdit_admin = ui->InsertPasswordBoxSi_Admin;
+    // ── Inițializare pointeri UI ──────────────────────────────────────────────
+    emailLineEdit         = ui->InsertEmailBoxSU;
+    parolaLineEdit        = ui->InsertPasswordBoxSU;
+    numeLineEdit          = ui->InsertNumeBoxSU;
+    prenumeLineEdit       = ui->InsertPrenumeBoxSU;
+    nrTelefonLineEdit     = ui->InsertNrTelefonBoxSU;
+    bioLineEdit           = ui->InsertBioBoxSU;
+    signInEmailEdit       = ui->InsertEmailBoxSI;
+    signInParolaEdit      = ui->InsertPasswordBoxSi;
+    emailLineEdit_admin   = ui->InsertEmailBoxSI_Admin;
+    parolaLineEdit_admin  = ui->InsertPasswordBoxSi_Admin;
     codPersonalEdit_admin = ui->InsertPersonalCodeBox;
 
-    // Connecturi - SIGN UP
-    connect(emailLineEdit, &QLineEdit::returnPressed, this, &SecondChance::onEmailReturnPressed);
-    connect(parolaLineEdit, &QLineEdit::returnPressed, this, &SecondChance::onParolaReturnPressed);
-    connect(numeLineEdit, &QLineEdit::returnPressed, this, &SecondChance::onNumeReturnPressed);
-    connect(prenumeLineEdit, &QLineEdit::returnPressed, this, &SecondChance::onPrenumeReturnPressed);
-    connect(nrTelefonLineEdit, &QLineEdit::returnPressed, this, &SecondChance::onNrTelefonReturnPressed);
-    connect(bioLineEdit, &QLineEdit::returnPressed, this, &SecondChance::onBioReturnPressed);
+    createProductTitleLineEdit       = ui->CreateTitleBox;
+    createProductDescriptionLineEdit = ui->CreateTitleDescription;
+    createProductPriceLineEdit       = ui->CreateTitlePrice;
+    createProductCategoryLineEdit    = ui->CreateTitleCategory;
+    createProductLocationLineEdit    = ui->CreateTitleLocation;
+    createProductDateLineEdit        = ui->CreateTitleDate;
 
-    // Connecturi - SIGN IN
-    connect(signInEmailEdit, &QLineEdit::returnPressed, this, &SecondChance::onSignInEmailReturnPressed);
-    connect(signInParolaEdit, &QLineEdit::returnPressed, this, &SecondChance::onSignInPasswordPressed);
+    // ── Parole ascunse ────────────────────────────────────────────────────────
+    parolaLineEdit->setEchoMode(QLineEdit::Password);
+    signInParolaEdit->setEchoMode(QLineEdit::Password);
+    parolaLineEdit_admin->setEchoMode(QLineEdit::Password);
 
-    // Connecturi - ADMIN
-    connect(emailLineEdit_admin, &QLineEdit::returnPressed, this, &SecondChance::onEmailAdminReturnPressed);
-    connect(parolaLineEdit_admin, &QLineEdit::returnPressed, this, &SecondChance::onParolaAdminEmailPressed);
-    connect(codPersonalEdit_admin, &QLineEdit::returnPressed, this, &SecondChance::onCodPersonalEmailPressed);
-}
+    // ── Ștergere erori vizuale când userul modifică câmpul ───────────────────
+    connectClearOnType(emailLineEdit);
+    connectClearOnType(parolaLineEdit);
+    connectClearOnType(numeLineEdit);
+    connectClearOnType(prenumeLineEdit);
+    connectClearOnType(nrTelefonLineEdit);
+    connectClearOnType(bioLineEdit);
+    connectClearOnType(signInEmailEdit);
+    connectClearOnType(signInParolaEdit);
+    connectClearOnType(emailLineEdit_admin);
+    connectClearOnType(parolaLineEdit_admin);
+    connectClearOnType(codPersonalEdit_admin);
+    connectClearOnType(createProductTitleLineEdit);
+    connectClearOnType(createProductDescriptionLineEdit);
+    connectClearOnType(createProductPriceLineEdit);
+    connectClearOnType(createProductCategoryLineEdit);
+    connectClearOnType(createProductLocationLineEdit);
+    connectClearOnType(createProductDateLineEdit);
 
-SecondChance::~SecondChance()
-{
-    delete ui;
-}
+    // ── Răspunsuri asincrone de la Server ────────────────────────────────────
+    connect(&ServerManager::get_instance(), &ServerManager::loginResult,
+            this, [this](bool success, QString msg) {
+                if (success) {
+                    ui->stackedWidget->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
+                    ui->StatusSignUpLabelSignIn->clear();
+                    setFieldOk(signInEmailEdit);
+                    setFieldOk(signInParolaEdit);
+                } else {
+                    ui->StatusSignUpLabelSignIn->setText("Email sau parolă incorecte!");
+                    ui->StatusSignUpLabelSignIn->setStyleSheet("color: red;");
+                    setFieldError(signInEmailEdit);
+                    setFieldError(signInParolaEdit, "Verificați datele introduse");
+                }
+            });
 
-//
-// ================= NAVIGARE =================
-//
+    connect(&ServerManager::get_instance(), &ServerManager::registerResult,
+            this, [this](bool success, QString msg) {
+                if (success) {
+                    ui->StatusSignUpLabelSU->setText("✔ Cont creat cu succes!");
+                    ui->StatusSignUpLabelSU->setStyleSheet("color: green;");
+                    // Curățăm câmpurile după înregistrare reușită
+                    emailLineEdit->clear();
+                    parolaLineEdit->clear();
+                    numeLineEdit->clear();
+                    prenumeLineEdit->clear();
+                    nrTelefonLineEdit->clear();
+                    bioLineEdit->clear();
+                    ui->stackedWidget->setCurrentWidget(ui->SignInClient);
+                } else {
+                    ui->StatusSignUpLabelSU->setText("✘ " + msg);
+                    ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
+                    setFieldError(emailLineEdit, "Email-ul poate fi deja folosit");
+                }
+            });
 
-void SecondChance::on_SignInButton_clicked()
-{
-    ui->stackedWidget->setCurrentWidget(ui->SignIn_UpPageClient);
-}
+    connect(&ServerManager::get_instance(), &ServerManager::adminLoginResult,
+            this, [this](bool success, QString msg) {
+                if (success) {
+                    ui->stackedWidget->setCurrentWidget(ui->AdminAppPage);
+                    ui->StatusSignUpLabelSignIn_Admin->clear();
+                } else {
+                    ui->StatusSignUpLabelSignIn_Admin->setText("✘ Date admin incorecte!");
+                    ui->StatusSignUpLabelSignIn_Admin->setStyleSheet("color: red;");
+                    setFieldError(emailLineEdit_admin);
+                    setFieldError(parolaLineEdit_admin);
+                    setFieldError(codPersonalEdit_admin, "Verificați codul personal");
+                }
+            });
 
-void SecondChance::on_SignUpButton_clicked()
-{
+    // ── Pagina inițială ───────────────────────────────────────────────────────
     ui->stackedWidget->setCurrentWidget(ui->ChooseAccountTypePage);
+
+    // ── Return pressed (focus) ────────────────────────────────────────────────
+    connect(emailLineEdit,     &QLineEdit::returnPressed, parolaLineEdit,    qOverload<>(&QLineEdit::setFocus));
+    connect(parolaLineEdit,    &QLineEdit::returnPressed, numeLineEdit,      qOverload<>(&QLineEdit::setFocus));
+    connect(numeLineEdit,      &QLineEdit::returnPressed, prenumeLineEdit,   qOverload<>(&QLineEdit::setFocus));
+    connect(prenumeLineEdit,   &QLineEdit::returnPressed, nrTelefonLineEdit, qOverload<>(&QLineEdit::setFocus));
+    connect(nrTelefonLineEdit, &QLineEdit::returnPressed, bioLineEdit,       qOverload<>(&QLineEdit::setFocus));
+    connect(signInEmailEdit,   &QLineEdit::returnPressed, signInParolaEdit,  qOverload<>(&QLineEdit::setFocus));
+    connect(signInParolaEdit,  &QLineEdit::returnPressed, this, &SecondChance::on_SignIntoAppButton_clicked);
+    connect(emailLineEdit_admin,   &QLineEdit::returnPressed, parolaLineEdit_admin,  qOverload<>(&QLineEdit::setFocus));
+    connect(parolaLineEdit_admin,  &QLineEdit::returnPressed, codPersonalEdit_admin, qOverload<>(&QLineEdit::setFocus));
+    connect(codPersonalEdit_admin, &QLineEdit::returnPressed, this, &SecondChance::on_SignIntoAppButton_Admin_clicked);
 }
 
-void SecondChance::on_SignInClientButton_clicked()
-{
-    ui->stackedWidget->setCurrentWidget(ui->SignInClient);
+// ─── Helper-e vizuale ─────────────────────────────────────────────────────────
+void SecondChance::setFieldError(QLineEdit* field, const QString& tooltip) {
+    field->setStyleSheet(STYLE_ERROR);
+    if (!tooltip.isEmpty()) field->setToolTip(tooltip);
 }
 
-void SecondChance::on_SignUpClientButton_clicked()
-{
-    ui->stackedWidget->setCurrentWidget(ui->SignUpClient);
+void SecondChance::setFieldOk(QLineEdit* field) {
+    field->setStyleSheet(STYLE_OK);
+    field->setToolTip("");
 }
 
-void SecondChance::on_pushButton_clicked()
-{
-    ui->stackedWidget->setCurrentWidget(ui->SignUpClient);
+void SecondChance::clearFieldState(QLineEdit* field) {
+    field->setStyleSheet(STYLE_RESET);
+    field->setToolTip("");
 }
 
-void SecondChance::on_ChooseClientTypeButton_clicked()
-{
-    ui->stackedWidget->setCurrentWidget(ui->SignIn_UpPageClient);
+void SecondChance::connectClearOnType(QLineEdit* field) {
+    connect(field, &QLineEdit::textChanged, this, [this, field]() {
+        clearFieldState(field);
+    });
 }
 
-void SecondChance::on_BackButtonSU_clicked()
-{
-    ui->stackedWidget->setCurrentWidget(ui->SignIn_UpPageClient);
-}
+// ─── Validări ─────────────────────────────────────────────────────────────────
+bool SecondChance::validateSignInFields() {
+    bool ok = true;
+    ServerManager& sm = ServerManager::get_instance();
 
-void SecondChance::on_BackButtonSI_clicked()
-{
-    ui->stackedWidget->setCurrentWidget(ui->SignIn_UpPageClient);
-}
+    if (signInEmailEdit->text().trimmed().isEmpty()) {
+        setFieldError(signInEmailEdit, "Introduceți email-ul");
+        ok = false;
+    }
+    if (signInParolaEdit->text().isEmpty()) {
+        setFieldError(signInParolaEdit, "Introduceți parola");
+        ok = false;
+    }
 
-void SecondChance::on_ChooseAdminClientButton_clicked()
-{
-    ui->stackedWidget->setCurrentWidget(ui->AdminSignInUpPage);
-}
-
-void SecondChance::on_AdminSignInButton_clicked()
-{
-    ui->stackedWidget->setCurrentWidget(ui->AdminSignInPage);
-}
-
-//
-// ================= RETURN PRESSED =================
-//
-
-void SecondChance::onEmailReturnPressed()
-{
-    emailLineEdit->clearFocus();
-}
-
-void SecondChance::onParolaReturnPressed()
-{
-    parolaLineEdit->clearFocus();
-}
-
-void SecondChance::onNumeReturnPressed()
-{
-    numeLineEdit->clearFocus();
-}
-
-void SecondChance::onPrenumeReturnPressed()
-{
-    prenumeLineEdit->clearFocus();
-}
-
-void SecondChance::onNrTelefonReturnPressed()
-{
-    nrTelefonLineEdit->clearFocus();
-}
-
-void SecondChance::onBioReturnPressed()
-{
-    bioLineEdit->clearFocus();
-}
-
-void SecondChance::onSignInEmailReturnPressed()
-{
-    signInEmailEdit->clearFocus();
-}
-
-void SecondChance::onSignInPasswordPressed()
-{
-    signInParolaEdit->clearFocus();
-}
-
-void SecondChance::onEmailAdminReturnPressed()
-{
-    emailLineEdit_admin->clearFocus();
-}
-
-void SecondChance::onParolaAdminEmailPressed()
-{
-    parolaLineEdit_admin->clearFocus();
-}
-
-void SecondChance::onCodPersonalEmailPressed()
-{
-    codPersonalEdit_admin->clearFocus();
-}
-
-//
-// ================= SIGN IN =================
-//
-
-void SecondChance::on_SignIntoAppButton_clicked()
-{
-    try {
-        QString email = signInEmailEdit->text().trimmed().remove(QRegularExpression("\\s"));
-        QString parola = signInParolaEdit->text().trimmed().remove(QRegularExpression("\\s"));
-
-        if (email.isEmpty() || parola.isEmpty()) {
-            throw MyException("Te rog completează toate câmpurile!");
-        }
-
-        bool loginValid = ServerManager::get_instance().checkLoginUtilizator(email, parola);
-
-        if (!loginValid) {
-            throw MyException("Contul nu există sau parola este greșită!");
-        }
-
-        ui->stackedWidget->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
+    if (!ok)
+        ui->StatusSignUpLabelSignIn->setText("Completați toate câmpurile!");
+    else
         ui->StatusSignUpLabelSignIn->clear();
 
-    } catch (const MyException& ex) {
-        ui->StatusSignUpLabelSignIn->setText(ex.what());
-        ui->StatusSignUpLabelSignIn->setStyleSheet("color: red;");
-    } catch (const std::exception& ex) {
-        ui->StatusSignUpLabelSignIn->setText("A apărut o eroare neașteptată!");
-        ui->StatusSignUpLabelSignIn->setStyleSheet("color: red;");
-        qDebug() << ex.what();
-    }
+    return ok;
 }
 
-//
-// ================= SIGN UP =================
-//
+bool SecondChance::validateSignUpFields() {
+    bool ok = true;
+    ServerManager& sm = ServerManager::get_instance();
+
+    if (emailLineEdit->text().trimmed().isEmpty()) {
+        setFieldError(emailLineEdit, "Email obligatoriu");
+        ok = false;
+    }
+    if (parolaLineEdit->text().length() < 6) {
+        setFieldError(parolaLineEdit, "Parola trebuie să aibă minim 6 caractere");
+        ok = false;
+    }
+    if (!sm.numeValid(numeLineEdit->text().trimmed())) {
+        setFieldError(numeLineEdit, "Numele poate conține doar litere");
+        ok = false;
+    }
+    if (!sm.prenumeValid(prenumeLineEdit->text().trimmed())) {
+        setFieldError(prenumeLineEdit, "Prenumele poate conține doar litere");
+        ok = false;
+    }
+    if (!sm.telefonValid(nrTelefonLineEdit->text().trimmed())) {
+        setFieldError(nrTelefonLineEdit, "Număr de telefon invalid (minim 10 cifre)");
+        ok = false;
+    }
+    if (!sm.bioValid(bioLineEdit->text())) {
+        setFieldError(bioLineEdit, "Bio-ul poate avea maxim 200 de caractere");
+        ok = false;
+    }
+
+    if (!ok)
+        ui->StatusSignUpLabelSU->setText("Verificați câmpurile marcate cu roșu!");
+    else
+        ui->StatusSignUpLabelSU->clear();
+
+    return ok;
+}
+
+bool SecondChance::validateAdminFields() {
+    bool ok = true;
+
+    if (emailLineEdit_admin->text().trimmed().isEmpty()) {
+        setFieldError(emailLineEdit_admin, "Email obligatoriu");
+        ok = false;
+    }
+    if (parolaLineEdit_admin->text().isEmpty()) {
+        setFieldError(parolaLineEdit_admin, "Parolă obligatorie");
+        ok = false;
+    }
+    if (codPersonalEdit_admin->text().trimmed().isEmpty()) {
+        setFieldError(codPersonalEdit_admin, "Cod personal obligatoriu");
+        ok = false;
+    }
+
+    if (!ok)
+        ui->StatusSignUpLabelSignIn_Admin->setText("Completați toate câmpurile!");
+    else
+        ui->StatusSignUpLabelSignIn_Admin->clear();
+
+    return ok;
+}
+
+bool SecondChance::validateProductFields() {
+    bool ok = true;
+
+    if (createProductTitleLineEdit->text().trimmed().isEmpty()) {
+        setFieldError(createProductTitleLineEdit, "Titlul este obligatoriu");
+        ok = false;
+    }
+    if (createProductPriceLineEdit->text().trimmed().isEmpty()) {
+        setFieldError(createProductPriceLineEdit, "Prețul este obligatoriu");
+        ok = false;
+    } else {
+        bool isDouble;
+        double price = createProductPriceLineEdit->text().toDouble(&isDouble);
+        if (!isDouble || price <= 0) {
+            setFieldError(createProductPriceLineEdit, "Introduceți un preț valid (ex: 49.99)");
+            ok = false;
+        }
+    }
+    if (createProductCategoryLineEdit->text().trimmed().isEmpty()) {
+        setFieldError(createProductCategoryLineEdit, "Categoria este obligatorie");
+        ok = false;
+    }
+    if (createProductLocationLineEdit->text().trimmed().isEmpty()) {
+        setFieldError(createProductLocationLineEdit, "Locația este obligatorie");
+        ok = false;
+    }
+
+    return ok;
+}
+
+// ─── Acțiuni butoane ─────────────────────────────────────────────────────────
+void SecondChance::on_SignIntoAppButton_clicked()
+{
+    if (!validateSignInFields()) return;
+
+    ServerManager::get_instance().checkLoginUtilizator(
+        signInEmailEdit->text().trimmed(),
+        signInParolaEdit->text()
+        );
+    ui->stackedWidget->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
+}
 
 void SecondChance::on_SignUpIntoApp_clicked()
 {
-    QString email = emailLineEdit->text().trimmed();
-    QString parola = parolaLineEdit->text().trimmed();
-    QString nume = numeLineEdit->text().trimmed();
-    QString prenume = prenumeLineEdit->text().trimmed();
-    QString nrTel = nrTelefonLineEdit->text().trimmed();
-    QString bio = bioLineEdit->text().trimmed();
+    if (!validateSignUpFields()) return;
 
-    if (email.isEmpty() || parola.isEmpty() || nume.isEmpty() || prenume.isEmpty() || nrTel.isEmpty()) {
-        ui->StatusSignUpLabelSU->setText("Toate câmpurile trebuie completate!");
-        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
-        return;
-    }
-
-    if (!email.contains("@") || !email.contains(".")) {
-        ui->StatusSignUpLabelSU->setText("Email invalid!");
-        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
-        return;
-    }
-
-    if (!ServerManager::get_instance().numeValid(nume)) {
-        ui->StatusSignUpLabelSU->setText("Nume invalid!");
-        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
-        return;
-    }
-
-    if (!ServerManager::get_instance().prenumeValid(prenume)) {
-        ui->StatusSignUpLabelSU->setText("Prenume invalid!");
-        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
-        return;
-    }
-
-    if (!ServerManager::get_instance().telefonValid(nrTel)) {
-        ui->StatusSignUpLabelSU->setText("Număr telefon invalid!");
-        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
-        return;
-    }
-
-    if (!ServerManager::get_instance().bioValid(bio)) {
-        ui->StatusSignUpLabelSU->setText("Bio prea lung! (max 200)");
-        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
-        return;
-    }
-
-    bool success = ServerManager::get_instance().registerClient(
+    ServerManager::get_instance().registerClient(
         ServerManager::get_instance().get_userIndexInApp(),
-        email, parola, nume, prenume, nrTel, bio
+        emailLineEdit->text().trimmed(),
+        parolaLineEdit->text(),
+        numeLineEdit->text().trimmed(),
+        prenumeLineEdit->text().trimmed(),
+        nrTelefonLineEdit->text().trimmed(),
+        bioLineEdit->text().trimmed()
         );
-
-    if (success) {
-        ui->StatusSignUpLabelSU->setText("User creat cu succes!");
-        ui->StatusSignUpLabelSU->setStyleSheet("color: green;");
-        ui->stackedWidget->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
-    } else {
-        ui->StatusSignUpLabelSU->setText("Email-ul există deja sau eroare!");
-        ui->StatusSignUpLabelSU->setStyleSheet("color: red;");
-    }
+    ui->stackedWidget->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
 }
 
 void SecondChance::on_SignIntoAppButton_Admin_clicked()
 {
-    QString adminEmail       = emailLineEdit_admin->text().trimmed();
-    QString adminParola      = parolaLineEdit_admin->text();
-    QString adminCodPersonal = codPersonalEdit_admin->text().trimmed();
+    if (!validateAdminFields()) return;
 
-    // 1️⃣ Validare câmpuri goale
-    if (adminEmail.isEmpty() || adminParola.isEmpty() || adminCodPersonal.isEmpty())
-    {
-        ui->StatusSignUpLabelSignIn_Admin->setStyleSheet("color: orange;");
-        ui->StatusSignUpLabelSignIn_Admin->setText("Completați toate câmpurile!");
-        return;
-    }
-
-    // 2️⃣ Verificare login
-    bool ValidLogIn = ServerManager::get_instance().checkLoginAdmin(adminEmail, adminParola, adminCodPersonal);
-
-    if (!ValidLogIn)
-    {
-        ui->StatusSignUpLabelSignIn_Admin->setStyleSheet("color: red;");
-        ui->StatusSignUpLabelSignIn_Admin->setText("Email, parolă sau cod personal incorect!");
-        return;
-    }
-
-    // 3️⃣ Login reușit → deschide fereastra de admin
-    ui->StatusSignUpLabelSignIn_Admin->setStyleSheet("color: green;");
-    ui->StatusSignUpLabelSignIn_Admin->setText("Autentificare reușită!");
-
-    ui->stackedWidget->setCurrentWidget(ui->AdminAppPage);
+    ServerManager::get_instance().checkLoginAdmin(
+        emailLineEdit_admin->text().trimmed(),
+        parolaLineEdit_admin->text(),
+        codPersonalEdit_admin->text().trimmed()
+        );
 }
 
+void SecondChance::on_CreateProductDoneButton_clicked()
+{
+    if (!validateProductFields()) return;
+
+    qDebug() << "[Qt] Produs nou:"
+             << "Titlu:"    << createProductTitleLineEdit->text()
+             << "Pret:"     << createProductPriceLineEdit->text()
+             << "Categorie:" << createProductCategoryLineEdit->text()
+             << "Locatie:"  << createProductLocationLineEdit->text();
+
+    // TODO: trimite produsul la server când implementezi acea funcționalitate
+}
+
+// ─── Navigare ─────────────────────────────────────────────────────────────────
+void SecondChance::on_SignInButton_clicked()            { ui->stackedWidget->setCurrentWidget(ui->SignIn_UpPageClient); }
+void SecondChance::on_SignUpButton_clicked()            { ui->stackedWidget->setCurrentWidget(ui->ChooseAccountTypePage); }
+void SecondChance::on_SignInClientButton_clicked()      { ui->stackedWidget->setCurrentWidget(ui->SignInClient); }
+void SecondChance::on_SignUpClientButton_clicked()      { ui->stackedWidget->setCurrentWidget(ui->SignUpClient); }
+void SecondChance::on_ChooseClientTypeButton_clicked()  { ui->stackedWidget->setCurrentWidget(ui->SignIn_UpPageClient); }
+void SecondChance::on_BackButtonSU_clicked()            { ui->stackedWidget->setCurrentWidget(ui->SignIn_UpPageClient); }
+void SecondChance::on_BackButtonSI_clicked()            { ui->stackedWidget->setCurrentWidget(ui->SignIn_UpPageClient); }
+void SecondChance::on_ChooseAdminClientButton_clicked() { ui->stackedWidget->setCurrentWidget(ui->AdminSignInUpPage); }
+void SecondChance::on_AdminSignInButton_clicked()       { ui->stackedWidget->setCurrentWidget(ui->AdminSignInPage); }
+void SecondChance::on_BackToUserType_clicked()          { ui->stackedWidget->setCurrentWidget(ui->ChooseAccountTypePage); }
+void SecondChance::on_BackButtonSI_Admin_clicked()      { ui->stackedWidget->setCurrentWidget(ui->ChooseAccountTypePage); }
+void SecondChance::on_FromAdminSignInToAccountType_clicked() { ui->stackedWidget->setCurrentWidget(ui->ChooseAccountTypePage); }
+void SecondChance::on_Create_Product_clicked()          { ui->stackedWidget->setCurrentWidget(ui->Interface_Create_Product); }
+void SecondChance::on_pushButton_clicked()              { ui->stackedWidget->setCurrentWidget(ui->SignUpClient); }
+
+// ─── Focus handlers (păstrate pentru compatibilitate cu header-ul) ────────────
+void SecondChance::onEmailReturnPressed()                    { emailLineEdit->clearFocus(); }
+void SecondChance::onParolaReturnPressed()                   { parolaLineEdit->clearFocus(); }
+void SecondChance::onNumeReturnPressed()                     { numeLineEdit->clearFocus(); }
+void SecondChance::onPrenumeReturnPressed()                  { prenumeLineEdit->clearFocus(); }
+void SecondChance::onNrTelefonReturnPressed()                { nrTelefonLineEdit->clearFocus(); }
+void SecondChance::onBioReturnPressed()                      { bioLineEdit->clearFocus(); }
+void SecondChance::onSignInEmailReturnPressed()              { signInEmailEdit->clearFocus(); }
+void SecondChance::onEmailAdminReturnPressed()               { emailLineEdit_admin->clearFocus(); }
+void SecondChance::onParolaAdminEmailPressed()               { parolaLineEdit_admin->clearFocus(); }
+void SecondChance::onCodPersonalEmailPressed()               { codPersonalEdit_admin->clearFocus(); }
+void SecondChance::onCreateProductTitleReturnPressed()       { createProductTitleLineEdit->clearFocus(); }
+void SecondChance::onCreateProductDescriptionReturnPressed() { createProductDescriptionLineEdit->clearFocus(); }
+void SecondChance::onCreateProductPriceReturnPressed()       { createProductPriceLineEdit->clearFocus(); }
+void SecondChance::onCreateProductCategoryReturnPressed()    { createProductCategoryLineEdit->clearFocus(); }
+void SecondChance::onCreateProductLocationReturnPressed()    { createProductLocationLineEdit->clearFocus(); }
+void SecondChance::onCreateProductDateReturnPressed()        { createProductDateLineEdit->clearFocus(); }
+
+SecondChance::~SecondChance() { delete ui; }

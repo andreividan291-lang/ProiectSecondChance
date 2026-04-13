@@ -30,7 +30,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>12</number>
       </property>
       <widget class="QWidget" name="SignIn_UpPageClient">
        <widget class="QPushButton" name="SignInClientButton">
@@ -57,6 +57,19 @@
         </property>
         <property name="text">
          <string>Sign Up</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="BackToUserType">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>30</y>
+          <width>93</width>
+          <height>29</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Back</string>
         </property>
        </widget>
       </widget>
@@ -133,6 +146,19 @@
          <string>ADMIN ALEGE:</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="FromAdminSignInToAccountType">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>30</y>
+          <width>93</width>
+          <height>29</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Back</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="PaginaAplicatieAdmin">
        <widget class="QLabel" name="label_16">
@@ -153,14 +179,14 @@
        <widget class="QLabel" name="label_13">
         <property name="geometry">
          <rect>
-          <x>96</x>
+          <x>80</x>
           <y>160</y>
           <width>121</width>
           <height>20</height>
          </rect>
         </property>
         <property name="text">
-         <string>parola</string>
+         <string>Parola</string>
         </property>
        </widget>
        <widget class="QLabel" name="StatusSignUpLabelSignIn_Admin">
@@ -179,7 +205,7 @@
        <widget class="QLabel" name="label_14">
         <property name="geometry">
          <rect>
-          <x>96</x>
+          <x>80</x>
           <y>130</y>
           <width>121</width>
           <height>20</height>
@@ -254,7 +280,7 @@
        <widget class="QLabel" name="label_17">
         <property name="geometry">
          <rect>
-          <x>100</x>
+          <x>80</x>
           <y>190</y>
           <width>101</width>
           <height>16</height>
@@ -479,6 +505,230 @@
         </property>
         <property name="text">
          <string>SECOND CHANCE MARKETPLACE CLIENT</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="Create_Product">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>80</y>
+          <width>131</width>
+          <height>29</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Create_Product</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="Interface_Create_Product">
+       <widget class="QLineEdit" name="CreateTitleDescription">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>90</y>
+          <width>81</width>
+          <height>21</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_19">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>90</y>
+          <width>131</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Descriere </string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_20">
+        <property name="geometry">
+         <rect>
+          <x>70</x>
+          <y>50</y>
+          <width>63</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Titlu</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_21">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>120</y>
+          <width>63</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Pret</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_22">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>160</y>
+          <width>91</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Categorie </string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_23">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>200</y>
+          <width>63</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Locatie</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_24">
+        <property name="geometry">
+         <rect>
+          <x>70</x>
+          <y>250</y>
+          <width>63</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Data</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="CreateTitleBox">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>50</y>
+          <width>81</width>
+          <height>21</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="CreateTitlePrice">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>130</y>
+          <width>81</width>
+          <height>21</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="CreateTitleCategory">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>170</y>
+          <width>81</width>
+          <height>21</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="CreateTitleLocation">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>210</y>
+          <width>81</width>
+          <height>21</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="CreateTitleDate">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>250</y>
+          <width>81</width>
+          <height>21</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="CreateProductDoneButton">
+        <property name="geometry">
+         <rect>
+          <x>140</x>
+          <y>280</y>
+          <width>93</width>
+          <height>29</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Gata</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="CreateProductErrorLabel">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>430</y>
+          <width>291</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="MyProductsPage">
+       <widget class="QLabel" name="label_25">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>70</y>
+          <width>181</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Produsele mele:</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="FavoritesPage">
+       <widget class="QLabel" name="label_26">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>60</y>
+          <width>63</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Favorite:</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="ProfilePage">
+       <widget class="QLabel" name="label_27">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>70</y>
+          <width>63</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Profil:</string>
         </property>
        </widget>
       </widget>

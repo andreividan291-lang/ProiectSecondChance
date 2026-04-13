@@ -1,28 +1,66 @@
 #include "servermanager.h"
 
+ServerManager* ServerManager::instance = nullptr;
 int ServerManager::userIndexInApp = 1000;
 int ServerManager::productIndexInApp = 1000;
 
-ServerManager* ServerManager::instance = nullptr;
-
-ServerManager::ServerManager(QObject* parent) : QTcpServer(parent)
+ServerManager::ServerManager(QObject* parent) : QObject(parent)
 {
-    // Lăsăm constructorul gol. Nu apelăm listen() aici și nu conectăm newConnection!
+    m_socket = new QTcpSocket(this);
+    m_buffer.clear();
+
+    connect(m_socket, &QTcpSocket::connected, []() {
+        qDebug() << "[Qt] Conectat la server (127.0.0.1:1234)";
+    });
+
+    connect(m_socket, &QTcpSocket::errorOccurred, [this](QAbstractSocket::SocketError) {
+        qDebug() << "[Qt] Eroare socket:" << m_socket->errorString();
+    });
+
+    // FIX: Acumulăm datele într-un buffer până găsim '\n'
+    connect(m_socket, &QTcpSocket::readyRead, this, [this]() {
+        m_buffer.append(m_socket->readAll());
+
+        // Procesăm toate mesajele complete din buffer (separate prin '\n')
+        while (m_buffer.contains('\n')) {
+            int idx = m_buffer.indexOf('\n');
+            QByteArray mesajComplet = m_buffer.left(idx).trimmed();
+            m_buffer.remove(0, idx + 1);
+
+            if (mesajComplet.isEmpty()) continue;
+
+            qDebug() << "[Qt] Mesaj primit:" << mesajComplet;
+
+            QJsonParseError parseError;
+            QJsonDocument doc = QJsonDocument::fromJson(mesajComplet, &parseError);
+
+            if (doc.isNull()) {
+                qDebug() << "[Qt] JSON invalid:" << parseError.errorString();
+                continue;
+            }
+
+            QJsonObject obj = doc.object();
+            QString action  = obj["action"].toString();
+            bool success    = (obj["status"].toString() == "SUCCESS");
+            QString message = obj["message"].toString();
+
+            if (action == "LOGIN")       emit loginResult(success, message);
+            else if (action == "REGISTER")    emit registerResult(success, message);
+            else if (action == "LOGIN_ADMIN") emit adminLoginResult(success, message);
+            else qDebug() << "[Qt] Actiune necunoscuta:" << action;
+        }
+    });
 }
 
 ServerManager& ServerManager::get_instance()
 {
-    if(instance == nullptr)
-    {
-        instance = new ServerManager;
-    }
+    if (instance == nullptr) instance = new ServerManager;
     return *instance;
 }
 
 void ServerManager::destroy_instance()
 {
-    if(instance)
-    {
+    if (instance) {
         delete instance;
         instance = nullptr;
     }
@@ -30,198 +68,80 @@ void ServerManager::destroy_instance()
 
 bool ServerManager::start_server(quint16 port)
 {
-    // Verificăm dacă serverul ascultă deja ca să nu îl pornim de două ori
-    if(this->isListening()) {
-        qDebug() << "Server is already running.";
-        return true;
-    }
+    if (m_socket->isOpen()) m_socket->close();
 
-    if(listen(QHostAddress::Any, port))
-    {
-        qDebug() << "Server started on port " << port;
-        return true;
-    }
+    qDebug() << "[Qt] Conectare la server port" << port;
+    m_socket->connectToHost("127.0.0.1", port);
 
-    qDebug() << "Server failed to start!";
+    if (m_socket->waitForConnected(3000)) return true;
+
+    qDebug() << "[Qt] Conectare esuata:" << m_socket->errorString();
     return false;
 }
 
 void ServerManager::stop_server()
 {
-    if(this->isListening())
-    {
-        this->close();
-        qDebug() << "Server stopped.";
+    if (m_socket->isOpen()) m_socket->disconnectFromHost();
+}
+
+void ServerManager::checkLoginUtilizator(const QString& email, const QString& parola)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) {
+        qDebug() << "[Qt] Eroare: socket deconectat!";
+        return;
     }
+    QJsonObject json;
+    json["action"]   = "LOGIN";
+    json["email"]    = email;
+    json["password"] = parola;
+
+    // FIX: adăugăm '\n' ca terminator de mesaj
+    QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n";
+    m_socket->write(data);
+    m_socket->flush();
 }
 
-void ServerManager::incomingConnection(qintptr socketDescriptor)
+void ServerManager::checkLoginAdmin(const QString& email, const QString& parola, const QString& codPers)
 {
-    qDebug() << "Client nou detectat. Alocam descriptorul:" << socketDescriptor;
+    if (m_socket->state() != QAbstractSocket::ConnectedState) return;
 
-    // Creăm thread-ul și îi pasăm descriptorul numeric
-    MyThread *thread = new MyThread(socketDescriptor, this);
+    QJsonObject json;
+    json["action"]       = "LOGIN_ADMIN";
+    json["email"]        = email;
+    json["password"]     = parola;
+    json["cod_personal"] = codPers;
 
-    // Când thread-ul își termină treaba (la deconectare), se șterge automat din memorie
-    connect(thread, &QThread::finished, thread, &QObject::deleteLater);
-
-    // Pornim thread-ul
-    thread->start();
+    m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n");
+    m_socket->flush();
 }
 
-ServerManager::~ServerManager()
+void ServerManager::registerClient(int id_app, const QString& email, const QString& parola,
+                                   const QString& n, const QString& pn,
+                                   const QString& t, const QString& b)
 {
-    stop_server();
+    if (m_socket->state() != QAbstractSocket::ConnectedState) return;
+
+    QJsonObject json;
+    json["action"]   = "REGISTER";
+    json["id"]       = id_app;
+    json["email"]    = email;
+    json["password"] = parola;
+    json["nume"]     = n;
+    json["prenume"]  = pn;
+    json["tel"]      = t;
+    json["bio"]      = b;
+
+    m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n");
+    m_socket->flush();
 }
 
-bool ServerManager::connectDB()
-{
-    QSqlDatabase db = QSqlDatabase::addDatabase("QODBC");
-
-    QString connectionString =
-        "Driver={ODBC Driver 17 for SQL Server};"
-        "Server=UNCELEBRUANONIM\\SQLEXPRESS;"
-        "Database=DB_POO;"
-        "Trusted_Connection=yes;";
-
-    db.setDatabaseName(connectionString);
-
-    if (!db.open()) {
-        qDebug() << "Eroare conectare:" << db.lastError().text();
-        return false;
-    }
-
-    qDebug() << "Conectat la DB_POO!";
-    return true;
+bool ServerManager::numeValid(const QString& n)   { return QRegularExpression("^[A-Za-z ]+$").match(n).hasMatch(); }
+bool ServerManager::prenumeValid(const QString& pn) { return QRegularExpression("^[A-Za-z ]+$").match(pn).hasMatch(); }
+bool ServerManager::bioValid(const QString& b)    { return b.length() <= 200; }
+bool ServerManager::telefonValid(const QString& t) {
+    if (t.isEmpty()) return false;
+    for (QChar c : t) if (!c.isDigit()) return false;
+    return t.length() >= 10;
 }
 
-bool ServerManager::registerClient(int id_app,QString email, QString parola, QString n, QString pn, QString t, QString b)
-{
-    // 1️⃣ Generează salt unic pentru fiecare user
-    QString salt = QUuid::createUuid().toString();
-
-    // 2️⃣ Creează hash-ul parolei + salt
-    QByteArray data = (parola + salt).toUtf8();
-    QString hash = QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex();
-
-    // 3️⃣ Inserăm în baza de date
-    QSqlQuery query;
-    query.prepare("INSERT INTO Utilizatori (id_in_app, email, password_hash, salt, nume, prenume, telefon, bio) "
-                  "VALUES (:id_in_app, :email, :hash, :salt, :nume, :prenume, :telefon, :bio)");
-
-    query.bindValue(":id_in_app",id_app);
-    query.bindValue(":email", email);
-    query.bindValue(":hash", hash);
-    query.bindValue(":salt", salt);
-    query.bindValue(":nume", n);
-    query.bindValue(":prenume", pn);
-    query.bindValue(":telefon", t);
-    query.bindValue(":bio", b);
-
-    if (!query.exec()) {
-        qDebug() << "Eroare INSERT:" << query.lastError().text();
-        return false;
-    }
-
-    qDebug() << "User salvat in DB!";
-    return true;
-}
-
-bool ServerManager::numeValid(QString n)
-{
-    QRegularExpression regex("^[A-Za-z]+$"); // doar litere mari și mici
-    if (regex.match(n).hasMatch()) {
-        return true;
-    }
-    return false;
-}
-
-bool ServerManager::prenumeValid(QString pn)
-{
-    QRegularExpression regex("^[A-Za-z]+$"); // doar litere mari și mici
-    if (regex.match(pn).hasMatch()) {
-        return true;
-    }
-    return false;
-}
-
-bool ServerManager::telefonValid(QString t)
-{
-    bool onlyDigits = true;
-    for (int i = 0; i < t.length(); ++i) {
-        if (!t.at(i).isDigit()) {
-            onlyDigits = false;
-            break;
-        }
-    }
-    return onlyDigits;
-}
-
-bool ServerManager::bioValid(QString b)
-{
-    if(b.length()<200)
-    {
-        return true;
-    }
-    return false;
-}
-
-// Funcție care returnează true dacă email și parola există în DB
-bool ServerManager::checkLoginUtilizator(QString email, QString parola)
-{
-    QSqlQuery query;
-    query.prepare("SELECT password_hash, salt FROM Utilizatori WHERE email = :email");
-    query.bindValue(":email", email);
-
-    // 1️⃣ Verificăm dacă există userul
-    if (!query.exec() || !query.next())
-        return false;
-
-    QString hash_db = query.value(0).toString();
-    QString salt_db = query.value(1).toString();
-
-    // 2️⃣ Refacem hash-ul cu parola introdusă
-    QByteArray data = (parola + salt_db).toUtf8();
-    QString hash_input = QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex();
-
-    // 3️⃣ Comparăm
-    return hash_input == hash_db;
-}
-
-bool ServerManager::checkLoginAdmin(QString email, QString parola, QString codPers)
-{
-    QSqlQuery query;
-    query.prepare("SELECT password_hash, salt, cod_personal FROM Admini WHERE email = :email");
-    query.bindValue(":email", email);
-
-    // 1️⃣ Verificăm dacă există userul
-    if (!query.exec() || !query.next())
-        return false;
-
-    QString hash_db  = query.value(0).toString();
-    QString salt_db  = query.value(1).toString();
-    QString codP_db  = query.value(2).toString();
-
-    // 2️⃣ Refacem hash-ul cu parola introdusă
-    QByteArray data = (parola + salt_db).toUtf8();
-    QString hash_input = QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex();
-
-    // 3️⃣ Comparăm parola
-    if (hash_input != hash_db)
-        return false;
-
-    // 4️⃣ Comparăm codul personal
-    return codPers == codP_db;
-}
-
-void ServerManager::generateAdminCredentials()
-{
-    QString parola = "a";
-    QString salt   = "a"; // poți pune orice string
-
-    QByteArray data = (parola + salt).toUtf8();
-    QString hash = QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex();
-
-    qDebug() << "Salt:" << salt;
-    qDebug() << "Hash:" << hash;
-}
+ServerManager::~ServerManager() { stop_server(); }

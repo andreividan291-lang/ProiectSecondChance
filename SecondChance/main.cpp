@@ -12,9 +12,9 @@ int main(int argc, char *argv[])
     SecondChance w;
     w.show();
 
-    ServerManager &MyServer = ServerManager::get_instance();
-    MyServer.start_server(1234);
-    MyServer.connectDB();
-    // MyServer.generateAdminCredentials();
+    // ELIMINĂ SAU COMENTEAZĂ LINIILE DE MAI JOS:
+    // ServerManager &MyServer = ServerManager::get_instance();
+    // MyServer.start_server(1234);
+
     return a.exec();
 }

@@ -1,37 +1,29 @@
+#ifndef SERVERMANAGER_H
 #define SERVERMANAGER_H
 
-#include <QUuid>
-#include <QCryptographicHash>
-#include <QRegularExpression>
-#include <QTcpServer>
+#include <QObject>
+#include <QTcpSocket>
 #include <QDebug>
-#include <QList>
-#include "mythread.h"
-#include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QSqlError>
-#include "utilizator.h"
-#include "myexception.h"
+#include <QRegularExpression>
+#include <QJsonDocument>
+#include <QJsonObject>
 
-class ServerManager : public QTcpServer
+class ServerManager : public QObject
 {
     Q_OBJECT
 
 private:
     static ServerManager* instance;
+    explicit ServerManager(QObject* parent = nullptr);
+    ~ServerManager();
+    ServerManager(const ServerManager&) = delete;
+    ServerManager& operator=(const ServerManager&) = delete;
+
+    QTcpSocket* m_socket;
+    QByteArray  m_buffer;   // FIX: buffer pentru pachete TCP fragmentate
 
     static int userIndexInApp;
     static int productIndexInApp;
-
-    // Constructor privat pentru Singleton
-    explicit ServerManager(QObject* parent = nullptr);
-    ~ServerManager();
-
-    // Blocăm copierea și mutarea (Regula Singleton-ului)
-    ServerManager(const ServerManager& s) = delete;
-    ServerManager(ServerManager&& s) = delete;
-    ServerManager& operator=(const ServerManager& s) = delete;
-    ServerManager& operator=(ServerManager&& s) = delete;
 
 public:
     static ServerManager& get_instance();
@@ -39,26 +31,26 @@ public:
 
     bool start_server(quint16 port);
     void stop_server();
-    void addUtilizator(Utilizator* u);
-    void deleteUtilizator(Utilizator* u);
-    void printUtilizatori();
-    bool connectDB();
-    bool registerClient(int id_app, QString email, QString parola, QString n, QString pn, QString t, QString b);
-    bool registerAdmin(int id_app, QString email, QString parola, QString nume, int nivel);
-    bool numeValid(QString n);
-    bool prenumeValid(QString pn);
-    bool telefonValid(QString n);
-    bool bioValid(QString n);
-    bool checkLoginUtilizator(QString email, QString parola);
-    int get_userIndexInApp(){userIndexInApp++;return userIndexInApp;}
-    int get_productIndexInApp(){productIndexInApp++;return productIndexInApp;}
-    bool checkLoginAdmin(QString email, QString parola, QString cod);
-    void generateAdminCredentials();
 
+    // Parametrii pasați prin const& (eficiență)
+    void checkLoginUtilizator(const QString& email, const QString& parola);
+    void checkLoginAdmin(const QString& email, const QString& parola, const QString& codPers);
+    void registerClient(int id_app, const QString& email, const QString& parola,
+                        const QString& n, const QString& pn,
+                        const QString& t, const QString& b);
 
-protected:
-    // Override-ul corect pentru multi-threading
-    void incomingConnection(qintptr socketDescriptor) override;
+    bool numeValid(const QString& n);
+    bool prenumeValid(const QString& pn);
+    bool telefonValid(const QString& t);
+    bool bioValid(const QString& b);
 
+    int get_userIndexInApp()    { return ++userIndexInApp; }
+    int get_productIndexInApp() { return ++productIndexInApp; }
+
+signals:
+    void loginResult(bool success, QString message);
+    void registerResult(bool success, QString message);
+    void adminLoginResult(bool success, QString message);
 };
 
+#endif // SERVERMANAGER_H
