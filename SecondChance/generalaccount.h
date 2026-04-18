@@ -1,4 +1,3 @@
-#ifndef GENERALACCOUNT_H
 #define GENERALACCOUNT_H
 
 #include <QString>
@@ -22,4 +21,3 @@ public:
     QString getParola() const;
 };
 
-#endif // GENERALACCOUNT_H

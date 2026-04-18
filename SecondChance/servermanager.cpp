@@ -1,7 +1,6 @@
 #include "servermanager.h"
 
 ServerManager* ServerManager::instance = nullptr;
-int ServerManager::userIndexInApp = 1000;
 int ServerManager::productIndexInApp = 1000;
 
 ServerManager::ServerManager(QObject* parent) : QObject(parent)
@@ -44,9 +43,25 @@ ServerManager::ServerManager(QObject* parent) : QObject(parent)
             bool success    = (obj["status"].toString() == "SUCCESS");
             QString message = obj["message"].toString();
 
-            if (action == "LOGIN")       emit loginResult(success, message);
-            else if (action == "REGISTER")    emit registerResult(success, message);
+            if (action == "LOGIN") {
+                int userId = obj["id"].toInt();
+                emit loginResult(success, message, userId);
+            }            else if (action == "REGISTER")    emit registerResult(success, message);
             else if (action == "LOGIN_ADMIN") emit adminLoginResult(success, message);
+            else if (action == "ADAUGA_PRODUS") {
+                int idProdus = obj["id_produs"].toInt();
+                emit adaugaProdusResult(success, message, idProdus);
+            }
+            else if (action == "ALIMENTARE_PORTOFEL") {
+                double soldNou = obj["sold_nou"].toDouble();
+                emit alimentarePortofelResult(success, message, soldNou);
+            }
+            else if (action == "SCHIMBARE_MAIL") {
+                emit schimbareMailResult(success, message);
+            }
+            else if (action == "SCHIMBARE_PAROLA") {
+                emit schimbareParolaResult(success, message);
+            }
             else qDebug() << "[Qt] Actiune necunoscuta:" << action;
         }
     });
@@ -115,7 +130,7 @@ void ServerManager::checkLoginAdmin(const QString& email, const QString& parola,
     m_socket->flush();
 }
 
-void ServerManager::registerClient(int id_app, const QString& email, const QString& parola,
+void ServerManager::registerClient( const QString& email, const QString& parola,
                                    const QString& n, const QString& pn,
                                    const QString& t, const QString& b)
 {
@@ -123,7 +138,6 @@ void ServerManager::registerClient(int id_app, const QString& email, const QStri
 
     QJsonObject json;
     json["action"]   = "REGISTER";
-    json["id"]       = id_app;
     json["email"]    = email;
     json["password"] = parola;
     json["nume"]     = n;
@@ -143,5 +157,69 @@ bool ServerManager::telefonValid(const QString& t) {
     for (QChar c : t) if (!c.isDigit()) return false;
     return t.length() >= 10;
 }
+void ServerManager::adaugaProdus(int idVanzator,
+                                 const QString& nume,
+                                 const QString& descriere,
+                                 const QString& pozaCale,
+                                 double pret,
+                                 const QString& categorie,
+                                 const QString& stare)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) {
+        qDebug() << "[Qt] Eroare: socket deconectat!";
+        return;
+    }
 
+    QJsonObject json;
+    json["action"]      = "ADAUGA_PRODUS";
+    json["id_vanzator"] = idVanzator;
+    json["nume"]        = nume;
+    json["descriere"]   = descriere;   // poate fi gol - optional
+    json["poza_cale"]   = pozaCale;    // poate fi gol
+    json["pret"]        = pret;
+    json["categorie"]   = categorie;
+    json["stare"]       = stare;
+
+    m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n");
+    m_socket->flush();
+}
 ServerManager::~ServerManager() { stop_server(); }
+
+void ServerManager::alimenteazaPortofel(int idUtilizator, double suma)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) return;
+
+    QJsonObject json;
+    json["action"]        = "ALIMENTARE_PORTOFEL";
+    json["id_utilizator"] = idUtilizator;
+    json["suma"]          = suma;
+
+    m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n");
+    m_socket->flush();
+}
+
+void ServerManager::schimbaMail(int idUtilizator, const QString& emailNou)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) return;
+
+    QJsonObject json;
+    json["action"]        = "SCHIMBARE_MAIL";
+    json["id_utilizator"] = idUtilizator;
+    json["email_nou"]     = emailNou;
+
+    m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n");
+    m_socket->flush();
+}
+
+void ServerManager::schimbaParola(int idUtilizator, const QString& parolaNova)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) return;
+
+    QJsonObject json;
+    json["action"]        = "SCHIMBARE_PAROLA";
+    json["id_utilizator"] = idUtilizator;
+    json["parola_noua"]   = parolaNova;
+
+    m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n");
+    m_socket->flush();
+}

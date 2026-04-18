@@ -4,4 +4,5 @@ SELECT * FROM Admini
 
 SELECT * FROM Utilizatori
 
-
+SELECT * FROM Produse
+	
