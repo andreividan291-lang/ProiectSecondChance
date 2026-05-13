@@ -1,6 +1,7 @@
 #include "secondchance.h"
 #include "./ui_secondchance.h"
 #include <QFileInfo>
+#include <QMessageBox>
 // ─── Stiluri ──────────────────────────────────────────────────────────────────
 static const QString STYLE_ERROR = "border: 1px solid red; border-radius: 4px;";
 static const QString STYLE_OK    = "border: 1px solid green; border-radius: 4px;";
@@ -12,6 +13,8 @@ SecondChance::SecondChance(QWidget *parent)
     , ui(new Ui::SecondChance)
 {
     ui->setupUi(this);
+
+    setupAppStyle();
 
     // Conectare la serverul VS
     if (!ServerManager::get_instance().start_server(1234)) {
@@ -43,6 +46,7 @@ SecondChance::SecondChance(QWidget *parent)
 
     // ── Parole ascunse ────────────────────────────────────────────────────────
     parolaLineEdit->setEchoMode(QLineEdit::Password);
+    insertNewPasswordLine->setEchoMode(QLineEdit::Password);
     signInParolaEdit->setEchoMode(QLineEdit::Password);
     parolaLineEdit_admin->setEchoMode(QLineEdit::Password);
 
@@ -72,8 +76,11 @@ SecondChance::SecondChance(QWidget *parent)
     connect(&ServerManager::get_instance(), &ServerManager::loginResult,
             this, [this](bool success, QString msg, int userId) {
                 if (success) {
-                    idUtilizatorLogat = userId; // salvăm id-ul real din baza de date
+                    idUtilizatorLogat = userId;
                     qDebug() << "[Qt] Utilizator logat cu ID:" << idUtilizatorLogat;
+
+                    incarcaProduse();
+
                     ui->ProductDetailPage->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
                     ui->StatusSignUpLabelSignIn->clear();
                     setFieldOk(signInEmailEdit);
@@ -97,6 +104,7 @@ SecondChance::SecondChance(QWidget *parent)
                     prenumeLineEdit->clear();
                     nrTelefonLineEdit->clear();
                     bioLineEdit->clear();
+                    incarcaProduse();
                     ui->ProductDetailPage->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
                 } else {
                     ui->StatusSignUpLabelSU->setText("✘ " + msg);
@@ -118,17 +126,30 @@ SecondChance::SecondChance(QWidget *parent)
                     setFieldError(codPersonalEdit_admin, "Verificați codul personal");
                 }
             });
-
     connect(&ServerManager::get_instance(), &ServerManager::adaugaProdusResult,
             this, [this](bool success, QString msg, int idProdus) {
                 ui->CreateProductDoneButton->setEnabled(true);
+
                 if (success) {
                     ui->StatusCreateProduct->setText(
                         "✔ Produs adăugat cu succes! (ID: " + QString::number(idProdus) + ")"
                         );
                     ui->StatusCreateProduct->setStyleSheet("color: green;");
 
-                    // Curatam campurile
+                    QString produsNou =
+                        createProductTitleLineEdit->text().trimmed()
+                        + " - "
+                        + createProductPriceLineEdit->text().trimmed()
+                        + " RON | "
+                        + createProductCategoryLineEdit->text().trimmed()
+                        + " | "
+                        + createProductLocationLineEdit->text().trimmed()
+                        + " | "
+                        + createProductConditionLineEdit->text().trimmed();
+
+                    produse.append(produsNou);
+
+                    // Curățăm câmpurile
                     createProductTitleLineEdit->clear();
                     createProductDescriptionLineEdit->clear();
                     createProductPriceLineEdit->clear();
@@ -136,11 +157,16 @@ SecondChance::SecondChance(QWidget *parent)
                     createProductLocationLineEdit->clear();
                     createProductConditionLineEdit->clear();
                     calePozaSelectata.clear();
-                    // Navigam inapoi dupa 1.5s
+
+                    ui->ChoosePicturePushButton->setText("Choose Picture");
+
+                    // Navigăm înapoi după 1.5s
                     QTimer::singleShot(1500, this, [this]() {
                         ui->ProductDetailPage->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
+                        incarcaProduse();
                         ui->StatusCreateProduct->clear();
                     });
+
                 } else {
                     ui->StatusCreateProduct->setText("✘ " + msg);
                     ui->StatusCreateProduct->setStyleSheet("color: red;");
@@ -190,7 +216,7 @@ SecondChance::SecondChance(QWidget *parent)
             });
 
     // ── Pagina inițială ───────────────────────────────────────────────────────
-    ui->ProductDetailPage->setCurrentWidget(ui->ChooseAccountTypePage);
+    ui->ProductDetailPage->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
 
     // ── Return pressed (focus) ────────────────────────────────────────────────
     connect(emailLineEdit,     &QLineEdit::returnPressed, parolaLineEdit,    qOverload<>(&QLineEdit::setFocus));
@@ -586,4 +612,212 @@ void SecondChance::on_ChoosePicturePushButton_clicked()
 
     // Afișăm numele fișierului selectat pe buton
     ui->ChoosePicturePushButton->setText("✔ " + QFileInfo(cale).fileName());
+}
+
+void SecondChance::setupAppStyle()
+{
+    this->setStyleSheet(
+        "QMainWindow {"
+        "background-color: #F5F6FA;"
+        "}"
+        "QLabel {"
+        "color: black;"
+        "font-size: 10pt;"
+        "}"
+        );
+
+    styleAllButtons();
+    styleAllLineEdits();
+    styleImportantButtons();
+}
+
+void SecondChance::styleAllButtons()
+{
+    QString buttonStyle =
+        "QPushButton {"
+        "background-color: #6C63FF;"
+        "color: white;"
+        "border: none;"
+        "border-radius: 12px;"
+        "padding: 8px;"
+        "font-size: 10pt;"
+        "font-weight: bold;"
+        "min-width: 120px;"
+        "min-height: 30px;"
+        "}"
+        "QPushButton:hover {"
+        "background-color: #574FD6;"
+        "}";
+
+    QList<QPushButton*> buttons = this->findChildren<QPushButton*>();
+
+    for (QPushButton* button : buttons)
+    {
+        button->setStyleSheet(buttonStyle);
+        button->setCursor(Qt::PointingHandCursor);
+    }
+}
+
+void SecondChance::styleAllLineEdits()
+{
+    QString lineEditStyle =
+        "QLineEdit {"
+        "background-color: white;"
+        "color: #2F3640;"
+        "border: 2px solid #DCDDE1;"
+        "border-radius: 10px;"
+        "padding: 7px;"
+        "font-size: 10pt;"
+        "}"
+        "QLineEdit:focus {"
+        "border: 2px solid #6C63FF;"
+        "}";
+
+    QList<QLineEdit*> edits = this->findChildren<QLineEdit*>();
+
+    for (QLineEdit* edit : edits)
+    {
+        edit->setStyleSheet(lineEditStyle);
+    }
+}
+
+void SecondChance::styleImportantButtons()
+{
+    if (ui->CreateProductDoneButton)
+    {
+        ui->CreateProductDoneButton->setStyleSheet(
+            "QPushButton {"
+            "background-color: #00B894;"
+            "color: white;"
+            "border: none;"
+            "border-radius: 14px;"
+            "padding: 8px 14px;"
+            "font-weight: bold;"
+            "}"
+            "QPushButton:hover {"
+            "background-color: #019875;"
+            "}"
+            );
+    }
+}
+
+ void SecondChance::incarcaProduse()
+ {
+        ui->ProductsListWidget->clear();
+        idProdusSelectat = -1;
+
+        if (produse.isEmpty()) {
+            produse.append("Geacă Zara - 120 RON | Haine | București | Bună");
+            produse.append("Pantofi Nike - 180 RON | Încălțăminte | Cluj | Foarte bună");
+            produse.append("Rochie elegantă - 90 RON | Haine | Iași | Nouă");
+        }
+
+        for (const QString& produs : produse) {
+            ui->ProductsListWidget->addItem(produs);
+        }
+  }
+
+ void SecondChance::on_ProductsListWidget_itemClicked(QListWidgetItem *item)
+ {
+     if (!item) {
+         idProdusSelectat = -1;
+         return;
+     }
+
+     idProdusSelectat = ui->ProductsListWidget->row(item);
+     qDebug() << "Produs selectat:" << idProdusSelectat;
+ }
+
+ void SecondChance::on_BuyProductButton_clicked()
+ {
+     QListWidgetItem *item = ui->ProductsListWidget->currentItem();
+
+     if (!item) {
+         QMessageBox::warning(this, "Eroare", "Selectează un produs!");
+         return;
+     }
+
+     if (item->text().contains("Vândut")) {
+         QMessageBox::warning(this, "Eroare", "Produsul este deja vândut!");
+         return;
+     }
+
+     item->setText(item->text() + " - Vândut");
+
+     int row = ui->ProductsListWidget->row(item);
+
+     if (row >= 0 && row < produse.size()) {
+         produse[row] = item->text();
+     }
+
+     QMessageBox::information(this, "Succes", "Produs cumpărat!");
+ }
+
+void SecondChance::on_ViewProductDetailsButton_clicked()
+{
+    QListWidgetItem *item = ui->ProductsListWidget->currentItem();
+
+    if (!item) {
+        QMessageBox::warning(this, "Eroare", "Selectează un produs!");
+        return;
+    }
+
+    QMessageBox::information(
+        this,
+        "Detalii produs",
+        "Detalii produs:\n\n" + item->text()
+        );
+}
+
+void SecondChance::on_AddToFavoritesButton_clicked()
+{
+    QListWidgetItem *item = ui->ProductsListWidget->currentItem();
+
+    if (!item) {
+        QMessageBox::warning(this, "Eroare", "Selectează un produs!");
+        return;
+    }
+
+    QString produs = item->text();
+
+    if (!favorite.contains(produs)) {
+        favorite.append(produs);
+        actualizeazaListaFavorite();
+    }
+
+    QMessageBox::information(this, "Favorite", "Produs adăugat la favorite!");
+}
+
+void SecondChance::actualizeazaListaFavorite()
+{
+    qDebug() << "Lista favorite actualizată:" << favorite;
+}
+
+void SecondChance::on_SearchProductButton_clicked()
+{
+    QString text = ui->SearchProductLineEdit->text();
+
+    for (int i = 0; i < ui->ProductsListWidget->count(); i++)
+    {
+        QListWidgetItem *item = ui->ProductsListWidget->item(i);
+
+        bool ok = item->text().contains(text, Qt::CaseInsensitive);
+
+        item->setHidden(!ok);
+    }
+}
+
+void SecondChance::on_ClearSearchButton_clicked()
+{
+    ui->SearchProductLineEdit->clear();
+
+    for (int i = 0; i < ui->ProductsListWidget->count(); i++)
+    {
+        ui->ProductsListWidget->item(i)->setHidden(false);
+    }
+}
+
+void SecondChance::on_RefreshProductsButton_clicked()
+{
+    incarcaProduse();
 }

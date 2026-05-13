@@ -9,6 +9,8 @@
     #include <QTimer>
     #include <QDir>
     #include "servermanager.h"
+    #include <QListWidgetItem>
+    #include <QStringList>
 
     QT_BEGIN_NAMESPACE
     namespace Ui { class SecondChance; }
@@ -100,6 +102,14 @@
 
         void on_ChoosePicturePushButton_clicked();
 
+        void on_SearchProductButton_clicked();
+        void on_ClearSearchButton_clicked();
+        void on_RefreshProductsButton_clicked();
+        void on_ProductsListWidget_itemClicked(QListWidgetItem *item);
+        void on_ViewProductDetailsButton_clicked();
+        void on_AddToFavoritesButton_clicked();
+        void on_BuyProductButton_clicked();
+
     private:
         Ui::SecondChance *ui;
 
@@ -128,8 +138,13 @@
         //de curatat codul
 
         // State intern
+        // State intern
         QString calePozaSelectata = "";
-        int     idUtilizatorLogat = 0;
+        int idUtilizatorLogat = 0;
+        int idProdusSelectat = -1;
+
+        QStringList produse;
+        QStringList favorite;
 
         // Helper-e de validare vizuala
         void setFieldError(QLineEdit* field, const QString& tooltip = "");
@@ -140,6 +155,18 @@
         bool validateAdminFields();
         bool validateProductFields();
         void connectClearOnType(QLineEdit* field);
+
+
+        // Stil aplicație
+        void setupAppStyle();
+        void styleAllButtons();
+        void styleAllLineEdits();
+        void styleImportantButtons();
+
+
+
+        void incarcaProduse();
+        void actualizeazaListaFavorite();
     };
 
     #endif // SECONDCHANCE_H

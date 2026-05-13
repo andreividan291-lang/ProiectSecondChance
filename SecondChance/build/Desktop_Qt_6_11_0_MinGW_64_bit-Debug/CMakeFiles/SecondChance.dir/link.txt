@@ -1,0 +1,3 @@
+C:\Qt\Tools\CMake_64\bin\cmake.exe -E rm -f CMakeFiles\SecondChance.dir/objects.a
+C:\Qt\Tools\mingw1310_64\bin\ar.exe qc CMakeFiles\SecondChance.dir/objects.a @CMakeFiles\SecondChance.dir\objects1.rsp
+C:\Qt\Tools\mingw1310_64\bin\g++.exe -g -mwindows -Wl,--whole-archive CMakeFiles\SecondChance.dir/objects.a -Wl,--no-whole-archive -o SecondChance.exe -Wl,--out-implib,libSecondChance.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\SecondChance.dir\linkLibs.rsp
