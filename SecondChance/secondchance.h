@@ -11,6 +11,8 @@
     #include "servermanager.h"
     #include <QListWidgetItem>
     #include <QStringList>
+    #include <QJsonArray>
+    #include <QButtonGroup>
 
     QT_BEGIN_NAMESPACE
     namespace Ui { class SecondChance; }
@@ -39,7 +41,6 @@
         void on_FromAdminSignInToAccountType_clicked();
         void on_Create_Product_clicked();
         void on_pushButton_clicked();
-
         // Actiuni Logica
         void on_SignIntoAppButton_clicked();
         void on_SignUpIntoApp_clicked();
@@ -109,7 +110,22 @@
         void on_ViewProductDetailsButton_clicked();
         void on_AddToFavoritesButton_clicked();
         void on_BuyProductButton_clicked();
+        void cautaProduse();
 
+        void on_NotificariButton_clicked();
+
+        void on_LogOutButton_clicked();
+
+        void on_BackToSettingsProduseCumparate_clicked();
+
+        void on_ProduseCumparate_clicked();
+
+    private:
+        int idComandaSelectata = -1;
+
+        void on_LaReviewButton_clicked();
+        void on_ToProduseCumparateButton_clicked();
+        void on_ProduseCumparateListWidget_itemClicked(QListWidgetItem* item);
     private:
         Ui::SecondChance *ui;
 
@@ -130,6 +146,8 @@
         QLineEdit *insertNewSumOfMoney;
         QLineEdit *insertNewMailLine;
         QLineEdit *insertNewPasswordLine;
+        QString categorieFiltraActiva = "";   // "" / "incaltaminte" / "imbracaminte"
+
         //de programat ca mai sus QLine ul numit InsertNewPasswordLine
         //de programat ca mai sus QLine ul numit InsertNewMailLine
         //de programat ca mai sus QLine ul numit InsertNewSumOfMoneyLine
@@ -167,6 +185,15 @@
 
         void incarcaProduse();
         void actualizeazaListaFavorite();
+
+    private:
+        QStringList listaNotificari;
+    private:
+        QListWidget* notificariWidget = nullptr;
+        int nrNotificariNecitite = 0;
+
+        void initNotificari();
+        void adaugaNotificare(const QString& mesaj);
     };
 
     #endif // SECONDCHANCE_H

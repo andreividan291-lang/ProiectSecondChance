@@ -7,6 +7,8 @@
 #include <QRegularExpression>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
+#include <QButtonGroup>
 
 class ServerManager : public QObject
 {
@@ -50,6 +52,16 @@ public:
     void alimenteazaPortofel(int idUtilizator, double suma);
     void schimbaMail(int idUtilizator, const QString& emailNou);
     void schimbaParola(int idUtilizator, const QString& parolaNova);
+    void getProduseClient(int idUtilizator,const QString& textCautare = "", const QString& categorie   = "");
+    void adaugaFavorit(int idUser, int idProdus);
+    void getProduseUtilizator(int idUtilizator);
+    void getFavorite(int idUser);
+    void cumparaProdus(int idCumparator, int idProdus);
+    void getNotificari(int idUser);
+    void marcheazaCitite(int idUser);
+    void getProduseCumparate(int idUser);
+    void getNotaVanzator(int idVanzator);
+    void lasaReview(int idCumparator, int idComanda, int nota, const QString& comentariu);
 
     bool numeValid(const QString& n);
     bool prenumeValid(const QString& pn);
@@ -64,12 +76,26 @@ public:
 signals:
     // FIX #4: loginResult transmite și id-ul utilizatorului
     void loginResult(bool success, QString message, int userId);
-    void registerResult(bool success, QString message);
+    void registerResult(bool success, QString msg, int userId);  // <-- adaugă int userId
     void adminLoginResult(bool success, QString message);
     void adaugaProdusResult(bool success, QString message, int idProdus);
     void alimentarePortofelResult(bool success, QString message, double soldNou);
     void schimbareMailResult(bool success, QString message);
     void schimbareParolaResult(bool success, QString message);
+    void produseClientResult(bool success, QString msg, QJsonArray produse);
+    void adaugaFavoritResult(bool success, QString msg);
+    void produseUtilizatorResult(bool success, QString msg, QJsonArray produse);
+    void getFavoriteResult(bool success, QString msg, QJsonArray produse);
+    void cumparaProdusResult(bool success, QString msg);
+    void getNotificariResult(bool success, QJsonArray notificari);
+    void marcheazaCititeResult(bool success);
+    void notificareNoua(QString tip, QString mesaj);
+    void produseCumparateResult(bool success, QString msg, QJsonArray produse);
+    void notaVanzatorResult(double nota, int nrReview);
+    void lasaReviewResult(bool success, QString msg);
+
+
+
 };
 
 #endif // SERVERMANAGER_H

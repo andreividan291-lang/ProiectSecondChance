@@ -77,10 +77,8 @@ SecondChance::SecondChance(QWidget *parent)
             this, [this](bool success, QString msg, int userId) {
                 if (success) {
                     idUtilizatorLogat = userId;
-                    qDebug() << "[Qt] Utilizator logat cu ID:" << idUtilizatorLogat;
-
                     incarcaProduse();
-
+                    ServerManager::get_instance().getNotificari(userId); // ADAUGĂ
                     ui->ProductDetailPage->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
                     ui->StatusSignUpLabelSignIn->clear();
                     setFieldOk(signInEmailEdit);
@@ -94,8 +92,11 @@ SecondChance::SecondChance(QWidget *parent)
             });
 
     connect(&ServerManager::get_instance(), &ServerManager::registerResult,
-            this, [this](bool success, QString msg) {
+            this, [this](bool success, QString msg, int userId) {  // <-- adaugă int userId
                 if (success) {
+                    idUtilizatorLogat = userId;  // <-- ADAUGĂ ASTA
+                    qDebug() << "[Qt] Utilizator inregistrat cu ID:" << idUtilizatorLogat;
+
                     ui->StatusSignUpLabelSU->setText("✔ Cont creat cu succes!");
                     ui->StatusSignUpLabelSU->setStyleSheet("color: green;");
                     emailLineEdit->clear();
@@ -112,7 +113,6 @@ SecondChance::SecondChance(QWidget *parent)
                     setFieldError(emailLineEdit, "Email-ul poate fi deja folosit");
                 }
             });
-
     connect(&ServerManager::get_instance(), &ServerManager::adminLoginResult,
             this, [this](bool success, QString msg) {
                 if (success) {
@@ -215,8 +215,254 @@ SecondChance::SecondChance(QWidget *parent)
                 }
             });
 
+    connect(&ServerManager::get_instance(), &ServerManager::produseClientResult,
+            this, [this](bool success, QString msg, QJsonArray produse) {
+                ui->ProductsListWidget->clear();
+                idProdusSelectat = -1;
+
+                if (!success) {
+                    QMessageBox::warning(this, "Eroare", msg);
+                    return;
+                }
+
+                for (const QJsonValue& val : produse) {
+                    QJsonObject p = val.toObject();
+
+                    int     id        = p["id"].toInt();
+                    QString nume      = p["nume"].toString();
+                    double  pret      = p["pret"].toDouble();
+                    QString categorie = p["categorie"].toString();
+                    QString stare     = p["stare"].toString();
+                    QString vanzator  = p["vanzator"].toString();
+
+                    QString linie = QString("%1 - %2 RON | %3 | %4 | %5")
+                                        .arg(nume)
+                                        .arg(pret, 0, 'f', 2)
+                                        .arg(categorie)
+                                        .arg(stare)
+                                        .arg(vanzator);
+
+                    QListWidgetItem* item = new QListWidgetItem(linie);
+                    item->setData(Qt::UserRole,     p["id"].toInt());
+                    item->setData(Qt::UserRole + 1, p["poza_cale"].toString());
+                    item->setData(Qt::UserRole + 2, p["descriere"].toString());
+                    item->setData(Qt::UserRole + 3, p["vanzator"].toString());
+                    item->setData(Qt::UserRole + 4, p["id_vanzator"].toInt());
+                    ui->ProductsListWidget->addItem(item);
+                }
+            });
+
+    connect(&ServerManager::get_instance(), &ServerManager::adaugaFavoritResult,
+            this, [this](bool success, QString msg) {
+                if (success)
+                    QMessageBox::information(this, "Favorite", "✔ Produs adăugat la favorite!");
+                else
+                    QMessageBox::warning(this, "Favorite", "✘ " + msg);
+            });
+
+    // ── Filtrare categorie ────────────────────────────────────────────────────
+    connect(ui->checkBox_Incaltaminte, &QCheckBox::toggled,
+            this, [this](bool checked) {
+                if (checked) {
+                    ui->checkBox_Imbracaminte->setChecked(false);
+                    categorieFiltraActiva = "Incaltaminte";
+                } else {
+                    categorieFiltraActiva = "";
+                }
+                cautaProduse();
+            });
+
+    connect(ui->checkBox_Imbracaminte, &QCheckBox::toggled,
+            this, [this](bool checked) {
+                if (checked) {
+                    ui->checkBox_Incaltaminte->setChecked(false);
+                    categorieFiltraActiva = "Imbracaminte";
+                } else {
+                    categorieFiltraActiva = "";
+                }
+                cautaProduse();
+            });
+
+    connect(&ServerManager::get_instance(), &ServerManager::produseUtilizatorResult,
+            this, [this](bool success, QString msg, QJsonArray produse) {
+                // Curățăm lista
+                QListWidget* lista = ui->MyProductsScrollContent->findChild<QListWidget*>();
+                if (!lista) {
+                    lista = new QListWidget(ui->MyProductsScrollContent);
+                    QVBoxLayout* layout = new QVBoxLayout(ui->MyProductsScrollContent);
+                    layout->addWidget(lista);
+                    lista->setStyleSheet(
+                        "QListWidget { background-color: white; color: #2F3640;"
+                        "border: 2px solid #DCDDE1; border-radius: 10px; padding: 5px; font-size: 10pt; }"
+                        "QListWidget::item { padding: 8px; border-bottom: 1px solid #DCDDE1; }"
+                        "QListWidget::item:selected { background-color: #6C63FF; color: white; border-radius: 6px; }"
+                        );
+                }
+                lista->clear();
+
+                if (!success) {
+                    QMessageBox::warning(this, "Eroare", msg);
+                    return;
+                }
+
+                if (produse.isEmpty()) {
+                    lista->addItem("Nu ai produse listate.");
+                    return;
+                }
+
+                for (const QJsonValue& val : produse) {
+                    QJsonObject p = val.toObject();
+                    QString vandut = p["vandut"].toString() == "1" ? " [VÂNDUT]" : "";
+                    QString linie = QString("%1 - %2 RON | %3 | %4%5")
+                                        .arg(p["nume"].toString())
+                                        .arg(p["pret"].toDouble(), 0, 'f', 2)
+                                        .arg(p["categorie"].toString())
+                                        .arg(p["stare"].toString())
+                                        .arg(vandut);
+
+                    QListWidgetItem* item = new QListWidgetItem(linie);
+                    item->setData(Qt::UserRole, p["id"].toInt());
+                    if (!vandut.isEmpty())
+                        item->setForeground(Qt::gray);
+                    lista->addItem(item);
+                }
+            });
+
+    connect(&ServerManager::get_instance(), &ServerManager::getFavoriteResult,
+            this, [this](bool success, QString msg, QJsonArray produse) {
+                ui->FavoritesListWidget->clear();
+
+                if (!success) {
+                    QMessageBox::warning(this, "Eroare", msg);
+                    return;
+                }
+
+                if (produse.isEmpty()) {
+                    ui->FavoritesListWidget->addItem("Nu ai produse favorite.");
+                    return;
+                }
+
+                for (const QJsonValue& val : produse) {
+                    QJsonObject p = val.toObject();
+
+                    QString linie = QString("%1 - %2 RON | %3 | %4")
+                                        .arg(p["nume"].toString())
+                                        .arg(p["pret"].toDouble(), 0, 'f', 2)
+                                        .arg(p["categorie"].toString())
+                                        .arg(p["stare"].toString());
+
+                    QListWidgetItem* item = new QListWidgetItem(linie);
+                    item->setData(Qt::UserRole,     p["id_produs"].toInt());
+                    item->setData(Qt::UserRole + 1, p["id_favorit"].toInt());
+                    ui->FavoritesListWidget->addItem(item);
+                }
+
+                ui->FavoritesListWidget->setStyleSheet(
+                    "QListWidget { background-color: white; color: #2F3640;"
+                    "border: 2px solid #DCDDE1; border-radius: 10px; padding: 5px; font-size: 10pt; }"
+                    "QListWidget::item { padding: 8px; border-bottom: 1px solid #DCDDE1; }"
+                    "QListWidget::item:selected { background-color: #6C63FF; color: white; border-radius: 6px; }"
+                    );
+            });
+
+    connect(&ServerManager::get_instance(), &ServerManager::cumparaProdusResult,
+            this, [this](bool success, QString msg) {
+                if (success) {
+                    QMessageBox::information(this, "Succes", "✔ Produs cumpărat cu succes!");
+                    cautaProduse();
+                    ServerManager::get_instance().getFavorite(idUtilizatorLogat);
+                    ServerManager::get_instance().getProduseUtilizator(idUtilizatorLogat);
+                } else {
+                    QMessageBox::warning(this, "Eroare", "✘ " + msg);
+                }
+            });
+
+    initNotificari();
+
+    connect(&ServerManager::get_instance(), &ServerManager::notificareNoua,
+            this, [this](QString tip, QString mesaj) {
+                // Salvează notificarea în listă
+                listaNotificari.prepend("🔔 " + mesaj);
+                // Reîncarcă favoritele
+                ServerManager::get_instance().getFavorite(idUtilizatorLogat);
+            });
+
+    // Rezultat notificări
+    connect(&ServerManager::get_instance(), &ServerManager::getNotificariResult,
+            this, [this](bool success, QJsonArray notificari) {
+                listaNotificari.clear();
+                if (!success) return;
+
+                int necitite = 0;
+                for (const QJsonValue& val : notificari) {
+                    QJsonObject n = val.toObject();
+                    QString prefix = n["citita"].toInt() == 0 ? "🔔 " : "✔ ";
+                    listaNotificari.append(prefix + n["mesaj"].toString());
+                    if (n["citita"].toInt() == 0) necitite++;
+                }
+
+                // Afișează badge pe buton dacă are necitite
+                if (necitite > 0)
+                    ui->NotificariButton->setText("🔔 Notificări (" + QString::number(necitite) + ")");
+                else
+                    ui->NotificariButton->setText("Notificări");
+            });
+
+    // Notificare în timp real
+    connect(&ServerManager::get_instance(), &ServerManager::notificareNoua,
+            this, [this](QString tip, QString mesaj) {
+                listaNotificari.prepend("🔔 " + mesaj);
+                ServerManager::get_instance().getFavorite(idUtilizatorLogat);
+                ServerManager::get_instance().getNotificari(idUtilizatorLogat);
+            });
+
+    connect(&ServerManager::get_instance(), &ServerManager::produseCumparateResult,
+            this, [this](bool success, QString msg, QJsonArray produse) {
+                ui->ProduseCumparateListWidget->clear();
+                idComandaSelectata = -1;
+
+                if (!success || produse.isEmpty()) {
+                    ui->ProduseCumparateListWidget->addItem("Nu ai produse cumpărate.");
+                    return;
+                }
+
+                for (const QJsonValue& val : produse) {
+                    QJsonObject p = val.toObject();
+                    bool areReview = p["are_review"].toInt() == 1;
+
+                    QString linie = QString("%1 - %2 RON | %3 | Vânzător: %4%5")
+                                        .arg(p["nume"].toString())
+                                        .arg(p["pret"].toDouble(), 0, 'f', 2)
+                                        .arg(p["categorie"].toString())
+                                        .arg(p["vanzator"].toString())
+                                        .arg(areReview ? " ✔ Review lăsat" : "");
+
+                    QListWidgetItem* item = new QListWidgetItem(linie);
+                    item->setData(Qt::UserRole,     p["id_comanda"].toInt());
+                    item->setData(Qt::UserRole + 1, areReview);
+                    if (areReview)
+                        item->setForeground(Qt::gray);
+                    ui->ProduseCumparateListWidget->addItem(item);
+                }
+            });
+
+    connect(&ServerManager::get_instance(), &ServerManager::lasaReviewResult,
+            this, [this](bool success, QString msg) {
+                if (success) {
+                    QMessageBox::information(this, "Succes", "✔ Review adăugat cu succes!");
+                    ServerManager::get_instance().getProduseCumparate(idUtilizatorLogat);
+                } else {
+                    QMessageBox::warning(this, "Eroare", "✘ " + msg);
+                }
+            });
+
+    connect(ui->LaReviewButton, &QPushButton::clicked,
+            this, &SecondChance::on_LaReviewButton_clicked);
+
+    connect(ui->ProduseCumparateListWidget, &QListWidget::itemClicked,
+            this, &SecondChance::on_ProduseCumparateListWidget_itemClicked);
     // ── Pagina inițială ───────────────────────────────────────────────────────
-    ui->ProductDetailPage->setCurrentWidget(ui->PaginaPrincipalaMagazinClient);
+    ui->ProductDetailPage->setCurrentWidget(ui->ChooseAccountTypePage);
 
     // ── Return pressed (focus) ────────────────────────────────────────────────
     connect(emailLineEdit,     &QLineEdit::returnPressed, parolaLineEdit,    qOverload<>(&QLineEdit::setFocus));
@@ -456,13 +702,13 @@ void SecondChance::on_ToSettingsPushButton_clicked()
 void SecondChance::on_ToMyProductsPushButton_clicked()
 {
     ui->ProductDetailPage->setCurrentWidget(ui->MyProductsPage);
+    ServerManager::get_instance().getProduseUtilizator(idUtilizatorLogat);
 }
-
-
 
 void SecondChance::on_ToMyFavoriteProducts_clicked()
 {
     ui->ProductDetailPage->setCurrentWidget(ui->FavoritesPage);
+    ServerManager::get_instance().getFavorite(idUtilizatorLogat);
 }
 
 
@@ -625,6 +871,30 @@ void SecondChance::setupAppStyle()
         "font-size: 10pt;"
         "}"
         );
+    // În styleAllButtons() sau direct în setupAppStyle(), adaugă:
+    ui->ProductsListWidget->setStyleSheet(
+        "QListWidget {"
+        "background-color: white;"
+        "color: #2F3640;"
+        "border: 2px solid #DCDDE1;"
+        "border-radius: 10px;"
+        "padding: 5px;"
+        "font-size: 10pt;"
+        "}"
+        "QListWidget::item {"
+        "padding: 8px;"
+        "border-bottom: 1px solid #DCDDE1;"
+        "}"
+        "QListWidget::item:selected {"
+        "background-color: #6C63FF;"
+        "color: white;"
+        "border-radius: 6px;"
+        "}"
+        "QListWidget::item:hover {"
+        "background-color: #F0EFFF;"
+        "color: #2F3640;"
+        "}"
+        );
 
     styleAllButtons();
     styleAllLineEdits();
@@ -701,93 +971,125 @@ void SecondChance::styleImportantButtons()
     }
 }
 
- void SecondChance::incarcaProduse()
- {
-        ui->ProductsListWidget->clear();
+// Funcție nouă — apelată de toate: refresh, search, filtre
+void SecondChance::cautaProduse()
+{
+    QString text      = ui->SearchProductLineEdit->text().trimmed();
+    QString categorie = categorieFiltraActiva;
+
+    ServerManager::get_instance().getProduseClient(
+        idUtilizatorLogat,
+        text,
+        categorie
+        );
+}
+// Înlocuiește incarcaProduse() complet:
+void SecondChance::incarcaProduse()
+{
+    ui->ProductsListWidget->clear();
+    idProdusSelectat = -1;
+    cautaProduse();   // delegăm tot la cautaProduse
+}
+
+
+void SecondChance::on_ProductsListWidget_itemClicked(QListWidgetItem *item)
+{
+    if (!item) {
         idProdusSelectat = -1;
+        return;
+    }
+    // Luăm ID-ul real din baza de date, nu indexul din listă
+    idProdusSelectat = item->data(Qt::UserRole).toInt();
+    qDebug() << "Produs selectat ID:" << idProdusSelectat;
+}
+void SecondChance::on_BuyProductButton_clicked()
+{
+    if (idProdusSelectat <= 0) {
+        QMessageBox::warning(this, "Eroare", "Selectează un produs!");
+        return;
+    }
 
-        if (produse.isEmpty()) {
-            produse.append("Geacă Zara - 120 RON | Haine | București | Bună");
-            produse.append("Pantofi Nike - 180 RON | Încălțăminte | Cluj | Foarte bună");
-            produse.append("Rochie elegantă - 90 RON | Haine | Iași | Nouă");
-        }
+    // Confirmare înainte de cumpărare
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        "Confirmare",
+        "Ești sigur că vrei să cumperi acest produs?",
+        QMessageBox::Yes | QMessageBox::No
+        );
 
-        for (const QString& produs : produse) {
-            ui->ProductsListWidget->addItem(produs);
-        }
-  }
+    if (reply != QMessageBox::Yes) return;
 
- void SecondChance::on_ProductsListWidget_itemClicked(QListWidgetItem *item)
- {
-     if (!item) {
-         idProdusSelectat = -1;
-         return;
-     }
-
-     idProdusSelectat = ui->ProductsListWidget->row(item);
-     qDebug() << "Produs selectat:" << idProdusSelectat;
- }
-
- void SecondChance::on_BuyProductButton_clicked()
- {
-     QListWidgetItem *item = ui->ProductsListWidget->currentItem();
-
-     if (!item) {
-         QMessageBox::warning(this, "Eroare", "Selectează un produs!");
-         return;
-     }
-
-     if (item->text().contains("Vândut")) {
-         QMessageBox::warning(this, "Eroare", "Produsul este deja vândut!");
-         return;
-     }
-
-     item->setText(item->text() + " - Vândut");
-
-     int row = ui->ProductsListWidget->row(item);
-
-     if (row >= 0 && row < produse.size()) {
-         produse[row] = item->text();
-     }
-
-     QMessageBox::information(this, "Succes", "Produs cumpărat!");
- }
+    ServerManager::get_instance().cumparaProdus(idUtilizatorLogat, idProdusSelectat);
+}
 
 void SecondChance::on_ViewProductDetailsButton_clicked()
 {
     QListWidgetItem *item = ui->ProductsListWidget->currentItem();
-
     if (!item) {
         QMessageBox::warning(this, "Eroare", "Selectează un produs!");
         return;
     }
 
-    QMessageBox::information(
-        this,
-        "Detalii produs",
-        "Detalii produs:\n\n" + item->text()
-        );
+    QString text      = item->text();
+    QString pozaCale  = item->data(Qt::UserRole + 1).toString();
+    QString descriere = item->data(Qt::UserRole + 2).toString();
+    int idVanzator    = item->data(Qt::UserRole + 4).toInt();
+
+    qDebug() << "[DEBUG] idVanzator pentru detalii =" << idVanzator;
+
+    ServerManager::get_instance().getNotaVanzator(idVanzator);
+
+    QMetaObject::Connection* conn = new QMetaObject::Connection();
+    *conn = connect(&ServerManager::get_instance(), &ServerManager::notaVanzatorResult,
+                    this, [this, text, pozaCale, descriere, conn](double nota, int nrReviewuri) {
+
+                        disconnect(*conn);
+                        delete conn;
+
+                        qDebug() << "[DEBUG] nota =" << nota << "nrReviewuri =" << nrReviewuri;
+
+                        QString mesaj = "Detalii produs:\n\n" + text;
+
+                        if (!descriere.isEmpty())
+                            mesaj += "\n\nDescriere: " + descriere;
+
+                        QString stele = "";
+                        int stelaInt = qRound(nota);
+                        for (int i = 1; i <= 5; i++)
+                            stele += (i <= stelaInt) ? "★" : "☆";
+
+                        if (nrReviewuri == 0)
+                            mesaj += "\n\n⭐ Vânzător fără review-uri încă.";
+                        else
+                            mesaj += QString("\n\n%1 %2/5 (%3 review-uri)")
+                                         .arg(stele).arg(nota, 0, 'f', 1).arg(nrReviewuri);
+
+                        QMessageBox msgBox(this);
+                        msgBox.setWindowTitle("Detalii produs");
+
+                        if (!pozaCale.isEmpty()) {
+                            QPixmap pix(pozaCale);
+                            if (!pix.isNull())
+                                msgBox.setIconPixmap(pix.scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                            else
+                                mesaj += "\n\n⚠ Imaginea nu poate fi încărcată.";
+                        } else {
+                            mesaj += "\n\n📷 Fără poză.";
+                        }
+
+                        msgBox.setText(mesaj);
+                        msgBox.exec();
+                    });
 }
 
 void SecondChance::on_AddToFavoritesButton_clicked()
 {
-    QListWidgetItem *item = ui->ProductsListWidget->currentItem();
-
-    if (!item) {
+    if (idProdusSelectat <= 0) {
         QMessageBox::warning(this, "Eroare", "Selectează un produs!");
         return;
     }
-
-    QString produs = item->text();
-
-    if (!favorite.contains(produs)) {
-        favorite.append(produs);
-        actualizeazaListaFavorite();
-    }
-
-    QMessageBox::information(this, "Favorite", "Produs adăugat la favorite!");
+    ServerManager::get_instance().adaugaFavorit(idUtilizatorLogat, idProdusSelectat);
 }
-
 void SecondChance::actualizeazaListaFavorite()
 {
     qDebug() << "Lista favorite actualizată:" << favorite;
@@ -795,16 +1097,7 @@ void SecondChance::actualizeazaListaFavorite()
 
 void SecondChance::on_SearchProductButton_clicked()
 {
-    QString text = ui->SearchProductLineEdit->text();
-
-    for (int i = 0; i < ui->ProductsListWidget->count(); i++)
-    {
-        QListWidgetItem *item = ui->ProductsListWidget->item(i);
-
-        bool ok = item->text().contains(text, Qt::CaseInsensitive);
-
-        item->setHidden(!ok);
-    }
+        cautaProduse();
 }
 
 void SecondChance::on_ClearSearchButton_clicked()
@@ -819,5 +1112,227 @@ void SecondChance::on_ClearSearchButton_clicked()
 
 void SecondChance::on_RefreshProductsButton_clicked()
 {
-    incarcaProduse();
+    cautaProduse();
+}
+
+void SecondChance::initNotificari()
+{
+    // Panou notificări în colțul din dreapta jos
+    notificariWidget = new QListWidget(this);
+    notificariWidget->setFixedSize(300, 200);
+    notificariWidget->hide();
+    notificariWidget->setStyleSheet(
+        "QListWidget {"
+        "background-color: white;"
+        "border: 2px solid #6C63FF;"
+        "border-radius: 10px;"
+        "padding: 5px;"
+        "font-size: 9pt;"
+        "}"
+        "QListWidget::item {"
+        "padding: 6px;"
+        "border-bottom: 1px solid #DCDDE1;"
+        "color: #2F3640;"
+        "}"
+        );
+}
+
+void SecondChance::adaugaNotificare(const QString& mesaj)
+{
+    if (!notificariWidget) return;
+
+    // Poziționează în colțul din dreapta jos
+    int x = this->width()  - notificariWidget->width()  - 10;
+    int y = this->height() - notificariWidget->height() - 10;
+    notificariWidget->move(x, y);
+    notificariWidget->raise();
+    notificariWidget->show();
+
+    QListWidgetItem* item = new QListWidgetItem("🔔 " + mesaj);
+    item->setForeground(QColor("#6C63FF"));
+    notificariWidget->insertItem(0, item);  // adaugă la început
+
+    nrNotificariNecitite++;
+
+    // Ascunde automat după 5 secunde
+    QTimer::singleShot(5000, this, [this]() {
+        notificariWidget->hide();
+    });
+}
+
+void SecondChance::on_NotificariButton_clicked()
+{
+    QDialog* dialog = new QDialog(this);
+    dialog->setWindowTitle("Notificări");
+    dialog->setMinimumSize(400, 300);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+    QVBoxLayout* layout = new QVBoxLayout(dialog);
+
+    QListWidget* lista = new QListWidget(dialog);
+    lista->setStyleSheet(
+        "QListWidget { background-color: white; color: #2F3640;"
+        "border: 2px solid #DCDDE1; border-radius: 10px; padding: 5px; font-size: 10pt; }"
+        "QListWidget::item { padding: 8px; border-bottom: 1px solid #DCDDE1; }"
+        "QListWidget::item[citita='0'] { font-weight: bold; color: #6C63FF; }"
+        );
+
+    if (listaNotificari.isEmpty()) {
+        lista->addItem("Nu ai notificări.");
+    } else {
+        for (const QString& notif : listaNotificari)
+            lista->addItem(notif);
+    }
+
+    QPushButton* stergeBtn = new QPushButton("Marchează toate ca citite", dialog);
+    stergeBtn->setStyleSheet(
+        "QPushButton { background-color: #00B894; color: white; border-radius: 10px;"
+        "padding: 8px; font-weight: bold; }"
+        "QPushButton:hover { background-color: #019875; }"
+        );
+    connect(stergeBtn, &QPushButton::clicked, this, [this, dialog]() {
+        ServerManager::get_instance().marcheazaCitite(idUtilizatorLogat);
+        ui->NotificariButton->setText("Notificări");
+        dialog->close();
+        // Reîncarcă notificările
+        ServerManager::get_instance().getNotificari(idUtilizatorLogat);
+    });
+
+    QPushButton* closeBtn = new QPushButton("Închide", dialog);
+    closeBtn->setStyleSheet(
+        "QPushButton { background-color: #6C63FF; color: white; border-radius: 10px;"
+        "padding: 8px; font-weight: bold; }"
+        "QPushButton:hover { background-color: #574FD6; }"
+        );
+    connect(closeBtn, &QPushButton::clicked, dialog, &QDialog::close);
+
+    layout->addWidget(lista);
+    layout->addWidget(stergeBtn);
+    layout->addWidget(closeBtn);
+
+    dialog->setLayout(layout);
+    dialog->exec();
+}
+
+void SecondChance::on_LogOutButton_clicked()
+{
+    // Reset state intern
+    idUtilizatorLogat = 0;
+    idProdusSelectat  = -1;
+    listaNotificari.clear();
+    categorieFiltraActiva = "";
+
+    // Curăță listele
+    ui->ProductsListWidget->clear();
+    ui->FavoritesListWidget->clear();
+    ui->SearchProductLineEdit->clear();
+    ui->checkBox_Incaltaminte->setChecked(false);
+    ui->checkBox_Imbracaminte->setChecked(false);
+    ui->NotificariButton->setText("Notificări");
+
+    // Navighează la pagina de login
+    ui->ProductDetailPage->setCurrentWidget(ui->ChooseAccountTypePage);
+}
+
+
+void SecondChance::on_BackToSettingsProduseCumparate_clicked()
+{
+        ui->ProductDetailPage->setCurrentWidget(ui->SettingsClient);
+}
+
+
+void SecondChance::on_ProduseCumparate_clicked()
+{
+    ui->ProductDetailPage->setCurrentWidget(ui->ProduseCumparatePage);
+    ServerManager::get_instance().getProduseCumparate(idUtilizatorLogat);
+}
+void SecondChance::on_ToProduseCumparateButton_clicked()
+{
+    ui->ProductDetailPage->setCurrentWidget(ui->ProduseCumparatePage);
+    ServerManager::get_instance().getProduseCumparate(idUtilizatorLogat);
+}
+
+void SecondChance::on_ProduseCumparateListWidget_itemClicked(QListWidgetItem* item)
+{
+    qDebug() << "[DEBUG] item clicked in ProduseCumparate";
+    if (!item) return;
+    idComandaSelectata = item->data(Qt::UserRole).toInt();
+    qDebug() << "[DEBUG] idComandaSelectata setat la:" << idComandaSelectata;
+}
+
+void SecondChance::on_LaReviewButton_clicked()
+{
+    qDebug() << "[DEBUG] LaReview apasat, idComandaSelectata =" << idComandaSelectata;
+
+    if (idComandaSelectata <= 0) {
+        QMessageBox::warning(this, "Eroare", "Selectează un produs!");
+        return;
+    }
+
+    QListWidgetItem* item = ui->ProduseCumparateListWidget->currentItem();
+    if (item && item->data(Qt::UserRole + 1).toBool()) {
+        QMessageBox::warning(this, "Eroare", "Ai lăsat deja un review pentru acest produs!");
+        return;
+    }
+
+    QDialog* dialog = new QDialog(this);
+    dialog->setWindowTitle("Lasă un review");
+    dialog->setMinimumWidth(350);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+    QVBoxLayout* layout = new QVBoxLayout(dialog);
+
+    QLabel* labelNota = new QLabel("Selectează nota (1-5 stele):", dialog);
+    labelNota->setStyleSheet("font-weight: bold; color: #2F3640; font-size: 11pt;");
+    layout->addWidget(labelNota);
+
+    QHBoxLayout* stelaLayout = new QHBoxLayout();
+    QButtonGroup* group = new QButtonGroup(dialog);
+    for (int i = 1; i <= 5; i++) {
+        QPushButton* stea = new QPushButton(QString("★ %1").arg(i), dialog);
+        stea->setCheckable(true);
+        stea->setStyleSheet(
+            "QPushButton { background-color: #DCDDE1; color: #2F3640; border-radius: 8px;"
+            "padding: 10px; font-size: 14pt; }"
+            "QPushButton:checked { background-color: #F9CA24; color: white; }"
+            );
+        group->addButton(stea, i);
+        stelaLayout->addWidget(stea);
+    }
+    layout->addLayout(stelaLayout);
+
+    QPushButton* trimiteBtn = new QPushButton("Trimite review", dialog);
+    trimiteBtn->setStyleSheet(
+        "QPushButton { background-color: #00B894; color: white; border-radius: 10px;"
+        "padding: 8px; font-weight: bold; margin-top: 10px; }"
+        "QPushButton:hover { background-color: #019875; }"
+        );
+    connect(trimiteBtn, &QPushButton::clicked, this, [this, dialog, group]() {
+        int nota = group->checkedId();
+        if (nota < 1 || nota > 5) {
+            QMessageBox::warning(dialog, "Eroare", "Selectează o notă!");
+            return;
+        }
+        ServerManager::get_instance().lasaReview(
+            idUtilizatorLogat,
+            idComandaSelectata,
+            nota,
+            ""  // fara comentariu
+            );
+        dialog->close();
+    });
+
+    QPushButton* closeBtn = new QPushButton("Anulează", dialog);
+    closeBtn->setStyleSheet(
+        "QPushButton { background-color: #6C63FF; color: white; border-radius: 10px;"
+        "padding: 8px; font-weight: bold; }"
+        "QPushButton:hover { background-color: #574FD6; }"
+        );
+    connect(closeBtn, &QPushButton::clicked, dialog, &QDialog::close);
+
+    layout->addWidget(trimiteBtn);
+    layout->addWidget(closeBtn);
+
+    dialog->setLayout(layout);
+    dialog->exec();
 }

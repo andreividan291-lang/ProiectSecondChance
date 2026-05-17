@@ -3,7 +3,6 @@
 #include <QApplication>
 #include <QString>
 #include "servermanager.h"
-#include "mythread.h"
 #include <ctime>
 
 int main(int argc, char *argv[])

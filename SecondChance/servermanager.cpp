@@ -1,4 +1,5 @@
 #include "servermanager.h"
+#include <QJsonArray>
 
 ServerManager* ServerManager::instance = nullptr;
 int ServerManager::productIndexInApp = 1000;
@@ -46,7 +47,13 @@ ServerManager::ServerManager(QObject* parent) : QObject(parent)
             if (action == "LOGIN") {
                 int userId = obj["id"].toInt();
                 emit loginResult(success, message, userId);
-            }            else if (action == "REGISTER")    emit registerResult(success, message);
+            }
+            else if (action == "REGISTER") {
+                bool success = obj["status"].toString() == "SUCCESS";
+                QString msg  = obj["message"].toString();
+                int userId   = obj["id"].toInt();  // <-- trebuie sa existe
+                emit registerResult(success, msg, userId);
+            }
             else if (action == "LOGIN_ADMIN") emit adminLoginResult(success, message);
             else if (action == "ADAUGA_PRODUS") {
                 int idProdus = obj["id_produs"].toInt();
@@ -61,6 +68,52 @@ ServerManager::ServerManager(QObject* parent) : QObject(parent)
             }
             else if (action == "SCHIMBARE_PAROLA") {
                 emit schimbareParolaResult(success, message);
+            }
+            else if (action == "GET_PRODUSE_CLIENT") {
+                bool    success = obj["status"].toString() == "SUCCESS";
+                QString msg     = obj["message"].toString();
+                QJsonArray data = obj["data"].toArray();
+                emit produseClientResult(success, msg, data);
+            }
+            else if (action == "ADAUGA_FAVORIT") {
+                bool    success = obj["status"].toString() == "SUCCESS";
+                QString msg     = obj["message"].toString();
+                emit adaugaFavoritResult(success, msg);
+            }
+            else if (action == "GET_PRODUSE_UTILIZATOR") {
+                QJsonArray data = obj["data"].toArray();
+                emit produseUtilizatorResult(success, message, data);
+            }
+            else if (action == "GET_FAVORITE") {
+                QJsonArray data = obj["data"].toArray();
+                emit getFavoriteResult(success, message, data);
+            }
+            else if (action == "CUMPARA_PRODUS") {
+                emit cumparaProdusResult(success, message);
+            }
+            else if (action == "NOTIFICARE") {
+                QString tip     = obj["tip"].toString();
+                QString mesaj   = obj["message"].toString();
+                emit notificareNoua(tip, mesaj);
+            }
+            else if (action == "GET_NOTIFICARI") {
+                QJsonArray data = obj["data"].toArray();
+                emit getNotificariResult(success, data);
+            }
+            else if (action == "MARCHEAZA_CITITE") {
+                emit marcheazaCititeResult(success);
+            }
+            else if (action == "GET_PRODUSE_CUMPARATE") {
+                QJsonArray data = obj["data"].toArray();
+                emit produseCumparateResult(success, message, data);
+            }
+            else if (action == "GET_NOTA_VANZATOR") {
+                double nota    = obj["nota_medie"].toDouble();
+                int    nrRev   = obj["nr_review_uri"].toInt();
+                emit notaVanzatorResult(nota, nrRev);
+            }
+            else if (action == "LASA_REVIEW") {
+                emit lasaReviewResult(success, message);
             }
             else qDebug() << "[Qt] Actiune necunoscuta:" << action;
         }
@@ -220,6 +273,139 @@ void ServerManager::schimbaParola(int idUtilizator, const QString& parolaNova)
     json["id_utilizator"] = idUtilizator;
     json["parola_noua"]   = parolaNova;
 
+    m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n");
+    m_socket->flush();
+}
+
+void ServerManager::getProduseClient(int idUtilizator,
+                                     const QString& textCautare,
+                                     const QString& categorie)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) {
+        qDebug() << "[Qt] Eroare: socket deconectat!";
+        return;
+    }
+    QJsonObject json;
+    json["action"]        = "GET_PRODUSE_CLIENT";
+    json["id_utilizator"] = idUtilizator;
+    json["text_cautare"]  = textCautare;
+    json["categorie"]     = categorie;
+
+    QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n";
+    m_socket->write(data);
+    m_socket->flush();
+}
+
+void ServerManager::adaugaFavorit(int idUser, int idProdus)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) {
+        qDebug() << "[Qt] Eroare: socket deconectat!";
+        return;
+    }
+    QJsonObject json;
+    json["action"]    = "ADAUGA_FAVORIT";
+    json["id_user"]   = idUser;
+    json["id_produs"] = idProdus;
+
+    QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n";
+    m_socket->write(data);
+    m_socket->flush();
+}
+
+void ServerManager::getProduseUtilizator(int idUtilizator)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) {
+        qDebug() << "[Qt] Eroare: socket deconectat!";
+        return;
+    }
+    QJsonObject json;
+    json["action"]        = "GET_PRODUSE_UTILIZATOR";
+    json["id_utilizator"] = idUtilizator;
+
+    QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n";
+    m_socket->write(data);
+    m_socket->flush();
+}
+void ServerManager::getFavorite(int idUser)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) {
+        qDebug() << "[Qt] Eroare: socket deconectat!";
+        return;
+    }
+    QJsonObject json;
+    json["action"]   = "GET_FAVORITE";
+    json["id_user"]  = idUser;
+
+    QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n";
+    m_socket->write(data);
+    m_socket->flush();
+}
+
+void ServerManager::cumparaProdus(int idCumparator, int idProdus)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) {
+        qDebug() << "[Qt] Eroare: socket deconectat!";
+        return;
+    }
+    QJsonObject json;
+    json["action"]        = "CUMPARA_PRODUS";
+    json["id_cumparator"] = idCumparator;
+    json["id_produs"]     = idProdus;
+
+    QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n";
+    m_socket->write(data);
+    m_socket->flush();
+}
+
+void ServerManager::getNotificari(int idUser)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) return;
+    QJsonObject json;
+    json["action"]   = "GET_NOTIFICARI";
+    json["id_user"]  = idUser;
+    m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n");
+    m_socket->flush();
+}
+
+void ServerManager::marcheazaCitite(int idUser)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) return;
+    QJsonObject json;
+    json["action"]   = "MARCHEAZA_CITITE";
+    json["id_user"]  = idUser;
+    m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n");
+    m_socket->flush();
+}
+
+void ServerManager::getProduseCumparate(int idUser)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) return;
+    QJsonObject json;
+    json["action"]  = "GET_PRODUSE_CUMPARATE";
+    json["id_user"] = idUser;
+    m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n");
+    m_socket->flush();
+}
+
+void ServerManager::getNotaVanzator(int idVanzator)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) return;
+    QJsonObject json;
+    json["action"]      = "GET_NOTA_VANZATOR";
+    json["id_vanzator"] = idVanzator;
+    m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n");
+    m_socket->flush();
+}
+
+void ServerManager::lasaReview(int idCumparator, int idComanda, int nota, const QString& comentariu)
+{
+    if (m_socket->state() != QAbstractSocket::ConnectedState) return;
+    QJsonObject json;
+    json["action"]       = "LASA_REVIEW";
+    json["id_cumparator"] = idCumparator;
+    json["id_comanda"]   = idComanda;
+    json["nota"]         = nota;
+    json["comentariu"]   = comentariu;
     m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact) + "\n");
     m_socket->flush();
 }
